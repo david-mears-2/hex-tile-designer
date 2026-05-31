@@ -111,12 +111,17 @@ export function useEditorCanvas({
     }
 
     function paintAt(pixels: Uint8ClampedArray, x: number, y: number): void {
-      if (!isInsideHex(x, y, hexConfig)) return;
-      if (editor.activeTool === 'eraser') {
-        paintPixel(pixels, width, x, y, 0, 0, 0, 0);
-      } else if (editor.activeTool === 'pencil') {
-        const [r, g, b, a] = parseColor(editor.activeColor);
-        paintPixel(pixels, width, x, y, r, g, b, a);
+      const br = editor.brushSize - 1; // radius in pixels (0 = single pixel)
+      const color: [number, number, number, number] =
+        editor.activeTool === 'eraser' ? [0, 0, 0, 0] : parseColor(editor.activeColor);
+      for (let dy = -br; dy <= br; dy++) {
+        for (let dx = -br; dx <= br; dx++) {
+          if (dx * dx + dy * dy > br * br) continue;
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          if (!isInsideHex(nx, ny, hexConfig)) continue;
+          paintPixel(pixels, width, nx, ny, ...color);
+        }
       }
     }
 

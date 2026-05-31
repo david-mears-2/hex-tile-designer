@@ -77,6 +77,7 @@ export function App() {
           onToolChange={setTool}
           onColorChange={setColor}
           onZoomChange={setZoom}
+          onBrushSizeChange={setBrushSize}
           onUndo={undo}
           canUndo={state.undoStack.length > 0}
         />

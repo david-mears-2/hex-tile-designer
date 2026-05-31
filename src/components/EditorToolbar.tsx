@@ -7,18 +7,28 @@ const TOOLS: { tool: ToolType; label: string; title: string }[] = [
   { tool: 'picker', label: '💉', title: 'Colour picker' },
 ];
 
+// Dot diameters (px) shown inside each brush size button
+const BRUSH_DOTS = [2, 5, 8, 11, 15];
+
 interface Props {
   activeTool: ToolType;
   activeColor: string;
   zoom: number;
   canUndo: boolean;
+  brushSize: number;
   onToolChange: (t: ToolType) => void;
   onColorChange: (c: string) => void;
   onZoomChange: (z: number) => void;
   onUndo: () => void;
+  onBrushSizeChange: (s: number) => void;
 }
 
-export function EditorToolbar({ activeTool, activeColor, zoom, canUndo, onToolChange, onColorChange, onZoomChange, onUndo }: Props) {
+export function EditorToolbar({
+  activeTool, activeColor, zoom, canUndo, brushSize,
+  onToolChange, onColorChange, onZoomChange, onUndo, onBrushSizeChange,
+}: Props) {
+  const showBrush = activeTool === 'pencil' || activeTool === 'eraser';
+
   return (
     <div className="editor-toolbar">
       <div className="editor-toolbar__tools">
@@ -33,6 +43,32 @@ export function EditorToolbar({ activeTool, activeColor, zoom, canUndo, onToolCh
           </button>
         ))}
       </div>
+
+      {showBrush && (
+        <div className="brush-size-group" title="Brush size">
+          {BRUSH_DOTS.map((dotPx, i) => {
+            const size = i + 1;
+            return (
+              <button
+                key={size}
+                className={`brush-btn${brushSize === size ? ' brush-btn--active' : ''}`}
+                title={`Brush size ${size}`}
+                onClick={() => onBrushSizeChange(size)}
+              >
+                <span style={{
+                  display: 'block',
+                  width: dotPx,
+                  height: dotPx,
+                  borderRadius: '50%',
+                  background: 'currentColor',
+                  flexShrink: 0,
+                }} />
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <label className="editor-toolbar__color" title="Active colour">
         <input
           type="color"

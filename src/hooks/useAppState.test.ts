@@ -83,6 +83,17 @@ describe('useAppState', () => {
     expect(result.current.state.editor.zoom).toBe(12);
   });
 
+  it('default brushSize is 1', () => {
+    const { result } = renderHook(() => useAppState());
+    expect(result.current.state.editor.brushSize).toBe(1);
+  });
+
+  it('setBrushSize updates brushSize', () => {
+    const { result } = renderHook(() => useAppState());
+    act(() => result.current.setBrushSize(3));
+    expect(result.current.state.editor.brushSize).toBe(3);
+  });
+
   it('skewX change applies immediately without dialog', () => {
     const { result } = renderHook(() => useAppState());
     act(() => result.current.setHexConfig({ skewX: 0.5 }));

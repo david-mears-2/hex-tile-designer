@@ -372,6 +372,38 @@ input[type='range'] {
   color: var(--text-muted);
 }
 
+/* ── Brush size ──────────────────────────────── */
+.brush-size-group {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.brush-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brush-btn:hover {
+  background: var(--surface-raised);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.brush-btn--active {
+  background: color-mix(in srgb, var(--accent) 20%, var(--surface-raised));
+  border-color: var(--accent);
+  color: var(--text);
+}
+
 /* ── Atlas preview ───────────────────────────── */
 .atlas-preview__scroll {
   flex: 1;

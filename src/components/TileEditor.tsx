@@ -15,6 +15,7 @@ interface Props {
   onToolChange: (t: ToolType) => void;
   onColorChange: (c: string) => void;
   onZoomChange: (z: number) => void;
+  onBrushSizeChange: (s: number) => void;
   onUndo: () => void;
   canUndo: boolean;
 }
@@ -29,6 +30,7 @@ export function TileEditor({
   onToolChange,
   onColorChange,
   onZoomChange,
+  onBrushSizeChange,
   onUndo,
   canUndo,
 }: Props) {
@@ -52,10 +54,12 @@ export function TileEditor({
         activeColor={editor.activeColor}
         zoom={editor.zoom}
         canUndo={canUndo}
+        brushSize={editor.brushSize}
         onToolChange={onToolChange}
         onColorChange={onColorChange}
         onZoomChange={onZoomChange}
         onUndo={onUndo}
+        onBrushSizeChange={onBrushSizeChange}
       />
       <div className="tile-editor__canvas-wrapper">
         {tile ? (
