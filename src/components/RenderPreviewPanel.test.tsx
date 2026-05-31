@@ -11,6 +11,10 @@ const editor: EditorState = {
   activeColor: '#3a7bd5',
   zoom: 5,
   brushSize: 1,
+  brushShape: 'circle',
+  brushAntiAlias: false,
+  crispEdges: false,
+  editorBgColor: '#3a3a3a',
   previewSquishY: 0.75,
 };
 

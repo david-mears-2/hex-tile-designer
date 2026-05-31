@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getPixel, paintPixel, parseColor, rgbaToHex, floodFill, getBrushOffsets } from './pixelPainter';
+import { getPixel, paintPixel, parseColor, rgbaToHex, floodFill, getBrushOffsets, getBrushCoverage } from './pixelPainter';
 import { hexBBox } from './hexGeometry';
 import type { HexConfig } from '../types';
 
