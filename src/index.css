@@ -460,6 +460,11 @@ input[type='range'] {
   color: var(--text);
 }
 
+.brush-btn--shape {
+  font-size: 22px;
+  line-height: 1;
+}
+
 /* ── Atlas preview ───────────────────────────── */
 .atlas-preview__scroll {
   flex: 1;

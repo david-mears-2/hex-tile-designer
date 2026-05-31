@@ -68,24 +68,31 @@ export function useTessellationPreview(
       const squishY = editor.previewSquishY;
       const designSquishY = hexConfig.squishY;
       const scaleY = designSquishY === 0 ? 1 : squishY / designSquishY;
-      const hasTransform = Math.abs(skewX) > 0.001 || Math.abs(scaleY - 1) > 0.001;
+      const hasSquish = Math.abs(scaleY - 1) > 0.001;
 
-      // Apply zoom: tile coordinates are in native units; ctx.scale maps them to screen
+      const visH = H / zoom;
+      const yMid = visH / 2;
+      // SkewX shifts whole rows horizontally to keep the lattice tessellating:
+      // rows above the vertical centre move right, rows below move left. This is a
+      // single global shear (x' = x − skewX·(y − yMid)) of the whole tiling, so the
+      // hexes still meet edge-to-edge. Extra columns cover the slanted rows.
+      const extraCols = Math.abs(skewX) < 0.001
+        ? 0
+        : Math.ceil((Math.abs(skewX) * yMid) / stepX) + 1;
+      const entryCount = layout.entries.length;
+
+      // Apply zoom: tile coordinates are in native units; ctx.scale maps them to screen.
       ctx.save();
       ctx.scale(zoom, zoom);
+      ctx.transform(1, 0, -skewX, 1, skewX * yMid, 0); // global skew shear
 
-      for (let col = 0; col < COLS; col++) {
+      for (let col = -extraCols; col < COLS + extraCols; col++) {
         for (let row = 0; row < ROWS; row++) {
-          const entryIndex = (col + row) % layout.entries.length;
+          const entryIndex = (((col + row) % entryCount) + entryCount) % entryCount;
           const entry = layout.entries[entryIndex];
 
           const cx = col * stepX + bbox.width / 2;
-          const cy = row * stepY + (col % 2) * (stepY / 2) + bbox.height / 2;
-
-          // Skip tiles clearly beyond the visible area (in native coords)
-          const visW = W / zoom;
-          const visH = H / zoom;
-          if (cx - bbox.width / 2 > visW || cy - bbox.height / 2 > visH) continue;
+          const cy = row * stepY + (((col % 2) + 2) % 2 === 1 ? stepY / 2 : 0) + bbox.height / 2;
 
           offCtx.clearRect(0, 0, bbox.width, bbox.height);
           offCtx.drawImage(
@@ -94,31 +101,26 @@ export function useTessellationPreview(
             0, 0, bbox.width, bbox.height,
           );
 
-          if (hasTransform) {
-            const clipPath = hexPath2D(hexConfig, cx, cy, { skewX, squishY });
-            ctx.save();
-            ctx.clip(clipPath);
+          // The hex shape carries only the preview squish; the global shear above
+          // applies the skew to both the cell shape and its row position.
+          const clipPath = hexPath2D(hexConfig, cx, cy, { squishY });
+          ctx.save();
+          ctx.clip(clipPath);
+          if (hasSquish) {
             ctx.translate(cx, cy);
-            ctx.transform(1, 0, skewX, scaleY, 0, 0);
+            ctx.transform(1, 0, 0, scaleY, 0, 0);
             ctx.drawImage(offscreenRef.current!, -bbox.width / 2, -bbox.height / 2);
-            ctx.restore();
-            ctx.strokeStyle = 'rgba(180, 180, 180, 0.25)';
-            ctx.lineWidth = 1;
-            ctx.stroke(clipPath);
           } else {
-            const clipPath = hexPath2D(hexConfig, cx, cy);
-            ctx.save();
-            ctx.clip(clipPath);
             ctx.drawImage(offscreenRef.current!, cx - bbox.width / 2, cy - bbox.height / 2);
-            ctx.restore();
-            ctx.strokeStyle = 'rgba(180, 180, 180, 0.25)';
-            ctx.lineWidth = 1;
-            ctx.stroke(clipPath);
           }
+          ctx.restore();
+          ctx.strokeStyle = 'rgba(180, 180, 180, 0.25)';
+          ctx.lineWidth = 1;
+          ctx.stroke(clipPath);
         }
       }
 
-      ctx.restore(); // end zoom scale
+      ctx.restore(); // end zoom + shear
     }
 
     let raf = 0;

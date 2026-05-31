@@ -67,7 +67,7 @@ export function EditorToolbar({
           {BRUSH_SHAPES.map(({ shape, label, title }) => (
             <button
               key={shape}
-              className={`brush-btn${brushShape === shape ? ' brush-btn--active' : ''}`}
+              className={`brush-btn brush-btn--shape${brushShape === shape ? ' brush-btn--active' : ''}`}
               title={title}
               onClick={() => onBrushShapeChange(shape)}
             >
