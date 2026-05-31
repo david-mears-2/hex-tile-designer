@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import type { TileType } from '../types';
+import type { TileType, HexConfig } from '../types';
+import { TilePreviewCanvas } from './TilePreviewCanvas';
 
 interface Props {
   tileTypes: TileType[];
   activeTileId: string | null;
+  hexConfig: HexConfig;
   onSelect: (id: string) => void;
   onAdd: () => void;
   onRemove: (id: string) => void;
   onRename: (id: string, name: string) => void;
 }
 
-export function TileTypeList({ tileTypes, activeTileId, onSelect, onAdd, onRemove, onRename }: Props) {
+export function TileTypeList({ tileTypes, activeTileId, hexConfig, onSelect, onAdd, onRemove, onRename }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
 
@@ -39,6 +41,7 @@ export function TileTypeList({ tileTypes, activeTileId, onSelect, onAdd, onRemov
             className={`tile-list__item${tile.id === activeTileId ? ' tile-list__item--active' : ''}`}
             onClick={() => onSelect(tile.id)}
           >
+            <TilePreviewCanvas tile={tile} hexConfig={hexConfig} />
             {editingId === tile.id ? (
               <input
                 className={`tile-list__rename${isDuplicate(tile.id, editingName) ? ' tile-list__rename--error' : ''}`}

@@ -55,6 +55,7 @@ export function App() {
         <TileTypeList
           tileTypes={tileTypes}
           activeTileId={editor.activeTileId}
+          hexConfig={hexConfig}
           onSelect={setActiveTile}
           onAdd={addTile}
           onRemove={removeTile}
