@@ -88,6 +88,19 @@ describe('useAppState', () => {
     expect(result.current.state.editor.brushSize).toBe(1);
   });
 
+  it('default brushShape is circle', () => {
+    const { result } = renderHook(() => useAppState());
+    expect(result.current.state.editor.brushShape).toBe('circle');
+  });
+
+  it('setBrushShape updates brushShape', () => {
+    const { result } = renderHook(() => useAppState());
+    act(() => result.current.setBrushShape('square'));
+    expect(result.current.state.editor.brushShape).toBe('square');
+    act(() => result.current.setBrushShape('diamond'));
+    expect(result.current.state.editor.brushShape).toBe('diamond');
+  });
+
   it('setBrushSize updates brushSize', () => {
     const { result } = renderHook(() => useAppState());
     act(() => result.current.setBrushSize(3));

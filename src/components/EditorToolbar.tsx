@@ -1,4 +1,4 @@
-import type { ToolType } from '../types';
+import type { ToolType, BrushShape } from '../types';
 
 const TOOLS: { tool: ToolType; label: string; title: string }[] = [
   { tool: 'pencil', label: '✏', title: 'Pencil' },
@@ -10,22 +10,30 @@ const TOOLS: { tool: ToolType; label: string; title: string }[] = [
 // Dot diameters (px) shown inside each brush size button
 const BRUSH_DOTS = [2, 5, 8, 11, 15];
 
+const BRUSH_SHAPES: { shape: BrushShape; label: string; title: string }[] = [
+  { shape: 'circle',  label: '●', title: 'Circle brush'  },
+  { shape: 'square',  label: '■', title: 'Square brush'  },
+  { shape: 'diamond', label: '◆', title: 'Diamond brush' },
+];
+
 interface Props {
   activeTool: ToolType;
   activeColor: string;
   zoom: number;
   canUndo: boolean;
   brushSize: number;
+  brushShape: BrushShape;
   onToolChange: (t: ToolType) => void;
   onColorChange: (c: string) => void;
   onZoomChange: (z: number) => void;
   onUndo: () => void;
   onBrushSizeChange: (s: number) => void;
+  onBrushShapeChange: (s: BrushShape) => void;
 }
 
 export function EditorToolbar({
-  activeTool, activeColor, zoom, canUndo, brushSize,
-  onToolChange, onColorChange, onZoomChange, onUndo, onBrushSizeChange,
+  activeTool, activeColor, zoom, canUndo, brushSize, brushShape,
+  onToolChange, onColorChange, onZoomChange, onUndo, onBrushSizeChange, onBrushShapeChange,
 }: Props) {
   const showBrush = activeTool === 'pencil' || activeTool === 'eraser';
 
@@ -43,6 +51,21 @@ export function EditorToolbar({
           </button>
         ))}
       </div>
+
+      {showBrush && (
+        <div className="brush-shape-group" title="Brush shape">
+          {BRUSH_SHAPES.map(({ shape, label, title }) => (
+            <button
+              key={shape}
+              className={`brush-btn${brushShape === shape ? ' brush-btn--active' : ''}`}
+              title={title}
+              onClick={() => onBrushShapeChange(shape)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {showBrush && (
         <div className="brush-size-group" title="Brush size">

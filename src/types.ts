@@ -11,6 +11,7 @@ export interface TileType {
 }
 
 export type ToolType = 'pencil' | 'fill' | 'eraser' | 'picker';
+export type BrushShape = 'circle' | 'square' | 'diamond';
 
 export interface EditorState {
   activeTileId: string | null;
@@ -18,6 +19,7 @@ export interface EditorState {
   activeColor: string;
   zoom: number;
   brushSize: number;
+  brushShape: BrushShape;
   previewSquishY: number;
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import type { TileType, HexConfig, EditorState, UndoEntry } from '../types';
 import { hexBBox, hexPath2D, isInsideHex } from '../lib/hexGeometry';
-import { paintPixel, getPixel, parseColor, rgbaToHex, floodFill } from '../lib/pixelPainter';
+import { paintPixel, getPixel, parseColor, rgbaToHex, floodFill, getBrushOffsets } from '../lib/pixelPainter';
 
 interface UseEditorCanvasOptions {
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -111,17 +111,13 @@ export function useEditorCanvas({
     }
 
     function paintAt(pixels: Uint8ClampedArray, x: number, y: number): void {
-      const br = editor.brushSize - 1; // radius in pixels (0 = single pixel)
       const color: [number, number, number, number] =
         editor.activeTool === 'eraser' ? [0, 0, 0, 0] : parseColor(editor.activeColor);
-      for (let dy = -br; dy <= br; dy++) {
-        for (let dx = -br; dx <= br; dx++) {
-          if (dx * dx + dy * dy > br * br) continue;
-          const nx = x + dx, ny = y + dy;
-          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
-          if (!isInsideHex(nx, ny, hexConfig)) continue;
-          paintPixel(pixels, width, nx, ny, ...color);
-        }
+      for (const [dx, dy] of getBrushOffsets(editor.brushSize, editor.brushShape)) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        if (!isInsideHex(nx, ny, hexConfig)) continue;
+        paintPixel(pixels, width, nx, ny, ...color);
       }
     }
 

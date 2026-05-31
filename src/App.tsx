@@ -25,6 +25,7 @@ export function App() {
     setColor,
     setZoom,
     setBrushSize,
+    setBrushShape,
     setPreviewSquishY,
     undo,
   } = useAppState();
@@ -79,6 +80,7 @@ export function App() {
           onColorChange={setColor}
           onZoomChange={setZoom}
           onBrushSizeChange={setBrushSize}
+          onBrushShapeChange={setBrushShape}
           onUndo={undo}
           canUndo={state.undoStack.length > 0}
         />

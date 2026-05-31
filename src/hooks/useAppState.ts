@@ -1,5 +1,5 @@
 import { useReducer, useEffect, useCallback } from 'react';
-import type { HexConfig, TileType, EditorState, ToolType, UndoEntry } from '../types';
+import type { HexConfig, TileType, EditorState, ToolType, UndoEntry, BrushShape } from '../types';
 import { hexBBox } from '../lib/hexGeometry';
 import { saveState, loadState } from '../lib/storage';
 
@@ -20,6 +20,7 @@ function defaultEditorState(squishY: number): EditorState {
     activeColor: '#3a7bd5',
     zoom: 5,
     brushSize: 1,
+    brushShape: 'circle' as BrushShape,
     previewSquishY: squishY,
   };
 }
@@ -46,6 +47,7 @@ type Action =
   | { type: 'SET_COLOR'; color: string }
   | { type: 'SET_ZOOM'; zoom: number }
   | { type: 'SET_BRUSH_SIZE'; size: number }
+  | { type: 'SET_BRUSH_SHAPE'; shape: BrushShape }
   | { type: 'SET_PREVIEW_SQUISH_Y'; value: number }
   | { type: 'UNDO' };
 
@@ -160,6 +162,9 @@ function reducer(state: State, action: Action): State {
     case 'SET_BRUSH_SIZE':
       return { ...state, editor: { ...state.editor, brushSize: action.size } };
 
+    case 'SET_BRUSH_SHAPE':
+      return { ...state, editor: { ...state.editor, brushShape: action.shape } };
+
     case 'SET_PREVIEW_SQUISH_Y':
       return { ...state, editor: { ...state.editor, previewSquishY: action.value } };
 
@@ -271,6 +276,7 @@ export function useAppState() {
   const setColor = useCallback((color: string) => dispatch({ type: 'SET_COLOR', color }), []);
   const setZoom = useCallback((zoom: number) => dispatch({ type: 'SET_ZOOM', zoom }), []);
   const setBrushSize = useCallback((size: number) => dispatch({ type: 'SET_BRUSH_SIZE', size }), []);
+  const setBrushShape = useCallback((shape: BrushShape) => dispatch({ type: 'SET_BRUSH_SHAPE', shape }), []);
   const setPreviewSquishY = useCallback((value: number) => dispatch({ type: 'SET_PREVIEW_SQUISH_Y', value }), []);
   const undo = useCallback(() => dispatch({ type: 'UNDO' }), []);
 
@@ -288,6 +294,7 @@ export function useAppState() {
     setColor,
     setZoom,
     setBrushSize,
+    setBrushShape,
     setPreviewSquishY,
     undo,
   };

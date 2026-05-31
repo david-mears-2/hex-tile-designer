@@ -1,5 +1,5 @@
 import { isInsideHex } from './hexGeometry';
-import type { HexConfig } from '../types';
+import type { HexConfig, BrushShape } from '../types';
 
 export function getPixel(
   pixels: Uint8ClampedArray,
@@ -43,6 +43,22 @@ export function parseColor(color: string): [number, number, number, number] {
 
 export function rgbaToHex(r: number, g: number, b: number): string {
   return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+export function getBrushOffsets(brushSize: number, brushShape: BrushShape): [number, number][] {
+  const r = brushSize - 1;
+  if (r === 0) return [[0, 0]];
+  const offsets: [number, number][] = [];
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      const inside =
+        brushShape === 'circle'  ? dx * dx + dy * dy <= r * r :
+        brushShape === 'diamond' ? Math.abs(dx) + Math.abs(dy) <= r :
+        true; // square
+      if (inside) offsets.push([dx, dy]);
+    }
+  }
+  return offsets;
 }
 
 export function floodFill(

@@ -394,7 +394,13 @@ input[type='range'] {
   cursor: not-allowed;
 }
 
-/* ── Brush size ──────────────────────────────── */
+/* ── Brush shape + size ──────────────────────── */
+.brush-shape-group {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
 .brush-size-group {
   display: flex;
   gap: 2px;

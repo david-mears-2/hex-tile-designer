@@ -3,7 +3,7 @@ import type { TileType, HexConfig, EditorState, UndoEntry } from '../types';
 import { hexBBox } from '../lib/hexGeometry';
 import { useEditorCanvas } from '../hooks/useEditorCanvas';
 import { EditorToolbar } from './EditorToolbar';
-import type { ToolType } from '../types';
+import type { ToolType, BrushShape } from '../types';
 
 interface Props {
   tile: TileType | null;
@@ -16,6 +16,7 @@ interface Props {
   onColorChange: (c: string) => void;
   onZoomChange: (z: number) => void;
   onBrushSizeChange: (s: number) => void;
+  onBrushShapeChange: (s: BrushShape) => void;
   onUndo: () => void;
   canUndo: boolean;
 }
@@ -31,6 +32,7 @@ export function TileEditor({
   onColorChange,
   onZoomChange,
   onBrushSizeChange,
+  onBrushShapeChange,
   onUndo,
   canUndo,
 }: Props) {
@@ -55,11 +57,13 @@ export function TileEditor({
         zoom={editor.zoom}
         canUndo={canUndo}
         brushSize={editor.brushSize}
+        brushShape={editor.brushShape}
         onToolChange={onToolChange}
         onColorChange={onColorChange}
         onZoomChange={onZoomChange}
         onUndo={onUndo}
         onBrushSizeChange={onBrushSizeChange}
+        onBrushShapeChange={onBrushShapeChange}
       />
       <div className="tile-editor__canvas-wrapper">
         {tile ? (
