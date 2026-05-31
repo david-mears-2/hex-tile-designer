@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useAppState } from './hooks/useAppState';
+import { useDraggableColumns } from './hooks/useDraggableColumns';
 import { hexBBox } from './lib/hexGeometry';
 import { computeAtlasLayout } from './lib/atlasLayout';
 import { TileTypeList } from './components/TileTypeList';
@@ -31,6 +32,7 @@ export function App() {
   } = useAppState();
 
   const { hexConfig, tileTypes, editor, pendingHexConfig } = state;
+  const { leftWidth, rightWidth, onLeftDividerDown, onRightDividerDown, layoutProps } = useDraggableColumns();
 
   const activeTile = tileTypes.find(t => t.id === editor.activeTileId) ?? null;
   const bbox = hexBBox(hexConfig);
@@ -50,8 +52,10 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo]);
 
+  const gridTemplate = `${leftWidth}px 4px 1fr 4px ${rightWidth}px`;
+
   return (
-    <div className="app-layout">
+    <div className="app-layout" style={{ gridTemplateColumns: gridTemplate }} {...layoutProps}>
       <aside className="sidebar sidebar--left">
         <TileTypeList
           tileTypes={tileTypes}
@@ -67,6 +71,7 @@ export function App() {
           onChange={setHexConfig}
         />
       </aside>
+      <div className="column-divider" onPointerDown={onLeftDividerDown} />
 
       <main className="editor-area">
         <TileEditor
@@ -85,6 +90,7 @@ export function App() {
           canUndo={state.undoStack.length > 0}
         />
       </main>
+      <div className="column-divider" onPointerDown={onRightDividerDown} />
 
       <aside className="sidebar sidebar--right">
         <RenderPreviewPanel

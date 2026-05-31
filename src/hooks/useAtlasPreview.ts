@@ -36,12 +36,16 @@ export function useTessellationPreview(
       const stepX = r * 1.5;
       const stepY = r * sy * Math.sqrt(3);
 
-      // Enough columns/rows to fill the container at native scale (add 2 as buffer)
-      const COLS = Math.max(2, Math.ceil((W - bbox.width) / stepX) + 2);
-      const ROWS = Math.max(2, Math.ceil((H - bbox.height - stepY / 2) / stepY) + 2);
+      // Scale tiles so 5 columns exactly span the container width; ROWS fill height
+      const nativeW5 = 4 * stepX + bbox.width;
+      const zoom = W / nativeW5;
+
+      const COLS = 5;
+      const ROWS = Math.max(2, Math.ceil((H / zoom - bbox.height - stepY / 2) / stepY) + 2);
 
       canvas.width = W;
       canvas.height = H;
+      ctx.imageSmoothingEnabled = false;
 
       ctx.fillStyle = '#1c1c1e';
       ctx.fillRect(0, 0, W, H);
@@ -66,6 +70,10 @@ export function useTessellationPreview(
       const scaleY = designSquishY === 0 ? 1 : squishY / designSquishY;
       const hasTransform = Math.abs(skewX) > 0.001 || Math.abs(scaleY - 1) > 0.001;
 
+      // Apply zoom: tile coordinates are in native units; ctx.scale maps them to screen
+      ctx.save();
+      ctx.scale(zoom, zoom);
+
       for (let col = 0; col < COLS; col++) {
         for (let row = 0; row < ROWS; row++) {
           const entryIndex = (col + row) % layout.entries.length;
@@ -74,8 +82,10 @@ export function useTessellationPreview(
           const cx = col * stepX + bbox.width / 2;
           const cy = row * stepY + (col % 2) * (stepY / 2) + bbox.height / 2;
 
-          // Skip tiles whose center is clearly off-canvas
-          if (cx - bbox.width / 2 > W || cy - bbox.height / 2 > H) continue;
+          // Skip tiles clearly beyond the visible area (in native coords)
+          const visW = W / zoom;
+          const visH = H / zoom;
+          if (cx - bbox.width / 2 > visW || cy - bbox.height / 2 > visH) continue;
 
           offCtx.clearRect(0, 0, bbox.width, bbox.height);
           offCtx.drawImage(
@@ -107,6 +117,8 @@ export function useTessellationPreview(
           }
         }
       }
+
+      ctx.restore(); // end zoom scale
     }
 
     let raf = 0;
