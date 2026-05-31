@@ -22,6 +22,7 @@ interface Props {
   zoom: number;
   canUndo: boolean;
   canRedo: boolean;
+  crispEdges: boolean;
   brushSize: number;
   brushShape: BrushShape;
   onToolChange: (t: ToolType) => void;
@@ -29,13 +30,15 @@ interface Props {
   onZoomChange: (z: number) => void;
   onUndo: () => void;
   onRedo: () => void;
+  onCrispEdgesChange: (v: boolean) => void;
   onBrushSizeChange: (s: number) => void;
   onBrushShapeChange: (s: BrushShape) => void;
 }
 
 export function EditorToolbar({
-  activeTool, activeColor, zoom, canUndo, canRedo, brushSize, brushShape,
-  onToolChange, onColorChange, onZoomChange, onUndo, onRedo, onBrushSizeChange, onBrushShapeChange,
+  activeTool, activeColor, zoom, canUndo, canRedo, crispEdges, brushSize, brushShape,
+  onToolChange, onColorChange, onZoomChange, onUndo, onRedo, onCrispEdgesChange,
+  onBrushSizeChange, onBrushShapeChange,
 }: Props) {
   const showBrush = activeTool === 'pencil' || activeTool === 'eraser';
 
@@ -120,10 +123,19 @@ export function EditorToolbar({
       >
         ↪
       </button>
-      <div className="editor-toolbar__zoom">
-        <button className="zoom-btn" onClick={() => onZoomChange(zoom - 1)} disabled={zoom <= 1}>−</button>
-        <span className="zoom-label">{zoom}×</span>
-        <button className="zoom-btn" onClick={() => onZoomChange(zoom + 1)} disabled={zoom >= 24}>+</button>
+      <div className="editor-toolbar__view">
+        <button
+          className={`tool-btn${!crispEdges ? ' tool-btn--active' : ''}`}
+          title={crispEdges ? 'Edge rendering: smooth (anti-aliased)' : 'Edge rendering: crisp (pixel-perfect)'}
+          onClick={() => onCrispEdgesChange(!crispEdges)}
+        >
+          AA
+        </button>
+        <div className="editor-toolbar__zoom">
+          <button className="zoom-btn" onClick={() => onZoomChange(zoom - 1)} disabled={zoom <= 1}>−</button>
+          <span className="zoom-label">{zoom}×</span>
+          <button className="zoom-btn" onClick={() => onZoomChange(zoom + 1)} disabled={zoom >= 24}>+</button>
+        </div>
       </div>
     </div>
   );

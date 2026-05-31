@@ -350,11 +350,17 @@ input[type='range'] {
   cursor: pointer;
 }
 
+.editor-toolbar__view {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
 .editor-toolbar__zoom {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
 }
 
 .zoom-btn {
