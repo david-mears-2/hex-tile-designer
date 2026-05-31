@@ -1,0 +1,114 @@
+import { useEffect, useMemo } from 'react';
+import { useAppState } from './hooks/useAppState';
+import { hexBBox } from './lib/hexGeometry';
+import { computeAtlasLayout } from './lib/atlasLayout';
+import { TileTypeList } from './components/TileTypeList';
+import { HexConfigPanel } from './components/HexConfigPanel';
+import { RenderPreviewPanel } from './components/RenderPreviewPanel';
+import { TileEditor } from './components/TileEditor';
+import { AtlasPreview } from './components/AtlasPreview';
+import { ExportButton } from './components/ExportButton';
+import { ConfirmClearDialog } from './components/ConfirmClearDialog';
+
+export function App() {
+  const {
+    state,
+    setHexConfig,
+    confirmHexConfigChange,
+    cancelHexConfigChange,
+    addTile,
+    removeTile,
+    renameTile,
+    setActiveTile,
+    commitPixels,
+    setTool,
+    setColor,
+    setZoom,
+    setPreviewSkew,
+    setPreviewSquishY,
+    undo,
+  } = useAppState();
+
+  const { hexConfig, tileTypes, editor, pendingHexConfig } = state;
+
+  const activeTile = tileTypes.find(t => t.id === editor.activeTileId) ?? null;
+  const bbox = hexBBox(hexConfig);
+  const layout = useMemo(
+    () => computeAtlasLayout(tileTypes, bbox),
+    [tileTypes, bbox]
+  );
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        undo();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo]);
+
+  return (
+    <div className="app-layout">
+      <aside className="sidebar sidebar--left">
+        <TileTypeList
+          tileTypes={tileTypes}
+          activeTileId={editor.activeTileId}
+          onSelect={setActiveTile}
+          onAdd={addTile}
+          onRemove={removeTile}
+          onRename={renameTile}
+        />
+        <HexConfigPanel
+          hexConfig={hexConfig}
+          onChange={setHexConfig}
+        />
+      </aside>
+
+      <main className="editor-area">
+        <TileEditor
+          tile={activeTile}
+          hexConfig={hexConfig}
+          editor={editor}
+          onCommitPixels={commitPixels}
+          onColorPick={setColor}
+          onPushUndo={() => {}}
+          onToolChange={setTool}
+          onColorChange={setColor}
+          onZoomChange={setZoom}
+          onUndo={undo}
+          canUndo={state.undoStack.length > 0}
+        />
+      </main>
+
+      <aside className="sidebar sidebar--right">
+        <RenderPreviewPanel
+          hexConfig={hexConfig}
+          editor={editor}
+          onSkewChange={v => setHexConfig({ skewX: v })}
+          onTogglePreviewSkew={setPreviewSkew}
+          onPreviewSquishYChange={setPreviewSquishY}
+        />
+        <AtlasPreview
+          tileTypes={tileTypes}
+          hexConfig={hexConfig}
+          editor={editor}
+          layout={layout}
+        />
+        <ExportButton
+          tileTypes={tileTypes}
+          hexConfig={hexConfig}
+          layout={layout}
+        />
+      </aside>
+
+      {pendingHexConfig && (
+        <ConfirmClearDialog
+          onConfirm={confirmHexConfigChange}
+          onCancel={cancelHexConfigChange}
+        />
+      )}
+    </div>
+  );
+}
