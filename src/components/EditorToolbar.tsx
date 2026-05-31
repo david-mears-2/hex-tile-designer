@@ -69,6 +69,8 @@ export function EditorToolbar({
         </div>
       )}
 
+      {showBrush && <div className="toolbar-sep" aria-hidden="true" />}
+
       {showBrush && (
         <div className="brush-size-group" title="Brush size">
           {BRUSH_DOTS.map((dotPx, i) => {

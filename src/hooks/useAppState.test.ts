@@ -210,6 +210,21 @@ describe('useAppState', () => {
     expect(result.current.state.redoStack).toHaveLength(0);
   });
 
+  it('removing a tile purges its entries from undo and redo stacks', () => {
+    const { result } = renderHook(() => useAppState());
+    const id = result.current.state.tileTypes[0].id;
+    const prev = result.current.state.tileTypes[0].pixels.slice() as Uint8ClampedArray;
+    const next = new Uint8ClampedArray(prev.length); next.fill(5);
+
+    act(() => result.current.commitPixels(id, next, prev)); // → undoStack
+    act(() => result.current.undo());                        // → redoStack
+    expect(result.current.state.redoStack).toHaveLength(1);
+
+    act(() => result.current.removeTile(id));
+    expect(result.current.state.undoStack).toHaveLength(0);
+    expect(result.current.state.redoStack).toHaveLength(0);
+  });
+
   it('redo restores the undone paint action', () => {
     const { result } = renderHook(() => useAppState());
     const id = result.current.state.tileTypes[0].id;

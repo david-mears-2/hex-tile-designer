@@ -118,10 +118,13 @@ function reducer(state: State, action: Action): State {
       const newActive = state.editor.activeTileId === action.id
         ? (remaining[0]?.id ?? null)
         : state.editor.activeTileId;
+      const keepEntry = (e: UndoEntry) => e.type === 'configClear' || e.tileId !== action.id;
       return {
         ...state,
         tileTypes: remaining,
         editor: { ...state.editor, activeTileId: newActive },
+        undoStack: state.undoStack.filter(keepEntry),
+        redoStack: state.redoStack.filter(keepEntry),
       };
     }
 

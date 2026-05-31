@@ -406,6 +406,16 @@ input[type='range'] {
   cursor: not-allowed;
 }
 
+/* ── Toolbar separator ───────────────────────── */
+.toolbar-sep {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+  flex-shrink: 0;
+  align-self: center;
+  margin: 0 4px;
+}
+
 /* ── Brush shape + size ──────────────────────── */
 .brush-shape-group {
   display: flex;
