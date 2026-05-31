@@ -105,9 +105,6 @@ function renderCanvas(
       }
     }
     ctx.restore();
-    ctx.strokeStyle = 'rgba(200, 200, 200, 0.7)';
-    ctx.lineWidth = 1;
-    ctx.stroke(hexPath);
   }
 }
 
@@ -261,9 +258,6 @@ export function useEditorCanvas({
           ctx.drawImage(offscreen, 0, 0);
         }
         ctx.restore();
-        ctx.strokeStyle = 'rgba(200, 200, 200, 0.7)';
-        ctx.lineWidth = 1;
-        ctx.stroke(hexPath);
       }
     }
 
