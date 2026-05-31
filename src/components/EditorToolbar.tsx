@@ -21,19 +21,21 @@ interface Props {
   activeColor: string;
   zoom: number;
   canUndo: boolean;
+  canRedo: boolean;
   brushSize: number;
   brushShape: BrushShape;
   onToolChange: (t: ToolType) => void;
   onColorChange: (c: string) => void;
   onZoomChange: (z: number) => void;
   onUndo: () => void;
+  onRedo: () => void;
   onBrushSizeChange: (s: number) => void;
   onBrushShapeChange: (s: BrushShape) => void;
 }
 
 export function EditorToolbar({
-  activeTool, activeColor, zoom, canUndo, brushSize, brushShape,
-  onToolChange, onColorChange, onZoomChange, onUndo, onBrushSizeChange, onBrushShapeChange,
+  activeTool, activeColor, zoom, canUndo, canRedo, brushSize, brushShape,
+  onToolChange, onColorChange, onZoomChange, onUndo, onRedo, onBrushSizeChange, onBrushShapeChange,
 }: Props) {
   const showBrush = activeTool === 'pencil' || activeTool === 'eraser';
 
@@ -107,6 +109,14 @@ export function EditorToolbar({
         disabled={!canUndo}
       >
         ↩
+      </button>
+      <button
+        className="tool-btn"
+        title="Redo (Ctrl+Y)"
+        onClick={onRedo}
+        disabled={!canRedo}
+      >
+        ↪
       </button>
       <div className="editor-toolbar__zoom">
         <button className="zoom-btn" onClick={() => onZoomChange(zoom - 1)} disabled={zoom <= 1}>−</button>

@@ -29,6 +29,7 @@ export function App() {
     setBrushShape,
     setPreviewSquishY,
     undo,
+    redo,
   } = useAppState();
 
   const { hexConfig, tileTypes, editor, pendingHexConfig } = state;
@@ -43,14 +44,18 @@ export function App() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
         undo();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo]);
+  }, [undo, redo]);
 
   const gridTemplate = `${leftWidth}px 4px 1fr 4px ${rightWidth}px`;
 
@@ -87,7 +92,11 @@ export function App() {
           onBrushSizeChange={setBrushSize}
           onBrushShapeChange={setBrushShape}
           onUndo={undo}
+          onRedo={redo}
           canUndo={state.undoStack.some(e =>
+            e.type === 'configClear' || e.tileId === editor.activeTileId
+          )}
+          canRedo={state.redoStack.some(e =>
             e.type === 'configClear' || e.tileId === editor.activeTileId
           )}
         />

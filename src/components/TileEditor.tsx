@@ -18,7 +18,9 @@ interface Props {
   onBrushSizeChange: (s: number) => void;
   onBrushShapeChange: (s: BrushShape) => void;
   onUndo: () => void;
+  onRedo: () => void;
   canUndo: boolean;
+  canRedo: boolean;
 }
 
 export function TileEditor({
@@ -34,7 +36,9 @@ export function TileEditor({
   onBrushSizeChange,
   onBrushShapeChange,
   onUndo,
+  onRedo,
   canUndo,
+  canRedo,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const bbox = hexBBox(hexConfig);
@@ -56,14 +60,16 @@ export function TileEditor({
         activeColor={editor.activeColor}
         zoom={editor.zoom}
         canUndo={canUndo}
+        canRedo={canRedo}
         brushSize={editor.brushSize}
         brushShape={editor.brushShape}
         onToolChange={onToolChange}
         onColorChange={onColorChange}
         onZoomChange={onZoomChange}
-        onUndo={onUndo}
         onBrushSizeChange={onBrushSizeChange}
         onBrushShapeChange={onBrushShapeChange}
+        onUndo={onUndo}
+        onRedo={onRedo}
       />
       <div className="tile-editor__canvas-wrapper">
         {tile ? (

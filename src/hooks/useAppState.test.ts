@@ -210,6 +210,57 @@ describe('useAppState', () => {
     expect(result.current.state.redoStack).toHaveLength(0);
   });
 
+  it('redo restores the undone paint action', () => {
+    const { result } = renderHook(() => useAppState());
+    const id = result.current.state.tileTypes[0].id;
+    const prev = result.current.state.tileTypes[0].pixels.slice() as Uint8ClampedArray;
+    const next = new Uint8ClampedArray(prev.length); next.fill(42);
+
+    act(() => result.current.commitPixels(id, next, prev));
+    expect(result.current.state.tileTypes[0].pixels[0]).toBe(42);
+
+    act(() => result.current.undo());
+    expect(result.current.state.tileTypes[0].pixels[0]).toBe(0);
+
+    act(() => result.current.redo());
+    expect(result.current.state.tileTypes[0].pixels[0]).toBe(42);
+    expect(result.current.state.redoStack).toHaveLength(0);
+    expect(result.current.state.undoStack).toHaveLength(1);
+  });
+
+  it('redo is scoped to the active tile', () => {
+    const { result } = renderHook(() => useAppState());
+    const [tileA, tileB] = result.current.state.tileTypes;
+
+    // Paint and undo A → A's entry enters redoStack
+    const aPrev = tileA.pixels.slice() as Uint8ClampedArray;
+    const aNext = new Uint8ClampedArray(aPrev.length); aNext.fill(7);
+    act(() => result.current.setActiveTile(tileA.id));
+    act(() => result.current.commitPixels(tileA.id, aNext, aPrev));
+    act(() => result.current.undo());
+    expect(result.current.state.redoStack).toHaveLength(1);
+
+    // Switch to B and try to redo → nothing for B, A unchanged
+    act(() => result.current.setActiveTile(tileB.id));
+    act(() => result.current.redo());
+    expect(result.current.state.redoStack).toHaveLength(1);       // still there
+    expect(result.current.state.tileTypes[0].pixels[0]).toBe(0);  // A not redone
+  });
+
+  it('redo reverses configClear when undone', () => {
+    const { result } = renderHook(() => useAppState());
+    act(() => result.current.setHexConfig({ squishY: 0.5 }));
+    act(() => result.current.confirmHexConfigChange());
+    expect(result.current.state.hexConfig.squishY).toBe(0.5);
+
+    act(() => result.current.undo());
+    expect(result.current.state.hexConfig.squishY).toBe(0.75);
+
+    act(() => result.current.redo());
+    expect(result.current.state.hexConfig.squishY).toBe(0.5);
+    expect(result.current.state.tileTypes[0].pixels.every(v => v === 0)).toBe(true);
+  });
+
   it('undo reverses paint action', () => {
     const { result } = renderHook(() => useAppState());
     const id = result.current.state.tileTypes[0].id;

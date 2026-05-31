@@ -50,7 +50,8 @@ type Action =
   | { type: 'SET_BRUSH_SIZE'; size: number }
   | { type: 'SET_BRUSH_SHAPE'; shape: BrushShape }
   | { type: 'SET_PREVIEW_SQUISH_Y'; value: number }
-  | { type: 'UNDO' };
+  | { type: 'UNDO' }
+  | { type: 'REDO' };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -225,6 +226,53 @@ function reducer(state: State, action: Action): State {
       return state;
     }
 
+    case 'REDO': {
+      const activeTileId = state.editor.activeTileId;
+      const idx = state.redoStack.findIndex(e =>
+        e.type === 'configClear' || e.tileId === activeTileId
+      );
+      if (idx === -1) return state;
+
+      const entry = state.redoStack[idx];
+      const newRedoStack = [
+        ...state.redoStack.slice(0, idx),
+        ...state.redoStack.slice(idx + 1),
+      ];
+      const newUndoStack = [entry, ...state.undoStack].slice(0, 50);
+
+      if (entry.type === 'paint') {
+        return {
+          ...state,
+          undoStack: newUndoStack,
+          redoStack: newRedoStack,
+          tileTypes: state.tileTypes.map(t =>
+            t.id === entry.tileId ? { ...t, pixels: entry.nextPixels } : t
+          ),
+        };
+      }
+
+      if (entry.type === 'configClear') {
+        const nextBbox = hexBBox(entry.nextConfig);
+        const pixelCount = nextBbox.width * nextBbox.height * 4;
+        return {
+          ...state,
+          undoStack: newUndoStack,
+          redoStack: newRedoStack,
+          hexConfig: entry.nextConfig,
+          tileTypes: state.tileTypes.map(t => ({
+            ...t,
+            pixels: new Uint8ClampedArray(pixelCount),
+          })),
+          editor: {
+            ...state.editor,
+            previewSquishY: entry.nextConfig.squishY,
+          },
+        };
+      }
+
+      return state;
+    }
+
     default:
       return state;
   }
@@ -303,6 +351,7 @@ export function useAppState() {
   const setBrushShape = useCallback((shape: BrushShape) => dispatch({ type: 'SET_BRUSH_SHAPE', shape }), []);
   const setPreviewSquishY = useCallback((value: number) => dispatch({ type: 'SET_PREVIEW_SQUISH_Y', value }), []);
   const undo = useCallback(() => dispatch({ type: 'UNDO' }), []);
+  const redo = useCallback(() => dispatch({ type: 'REDO' }), []);
 
   return {
     state,
@@ -321,5 +370,6 @@ export function useAppState() {
     setBrushShape,
     setPreviewSquishY,
     undo,
+    redo,
   };
 }
