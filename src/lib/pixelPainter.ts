@@ -61,6 +61,33 @@ export function getBrushOffsets(brushSize: number, brushShape: BrushShape): [num
   return offsets;
 }
 
+// Like getBrushOffsets, but returns a fractional coverage (0, 1] for each pixel so
+// curved brush edges can be anti-aliased. Square edges are pixel-aligned, so they
+// always get full coverage; circle/diamond edges fade out over the outermost ~1px.
+export function getBrushCoverage(
+  brushSize: number,
+  brushShape: BrushShape
+): [number, number, number][] {
+  const r = brushSize - 1;
+  if (r === 0) return [[0, 0, 1]];
+  const out: [number, number, number][] = [];
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      let cov: number;
+      if (brushShape === 'square') {
+        cov = 1;
+      } else if (brushShape === 'circle') {
+        cov = r + 0.5 - Math.sqrt(dx * dx + dy * dy);
+      } else {
+        cov = r + 0.5 - (Math.abs(dx) + Math.abs(dy));
+      }
+      cov = Math.max(0, Math.min(1, cov));
+      if (cov > 0) out.push([dx, dy, cov]);
+    }
+  }
+  return out;
+}
+
 export function floodFill(
   pixels: Uint8ClampedArray,
   width: number,

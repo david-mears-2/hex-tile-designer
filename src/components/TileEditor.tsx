@@ -17,6 +17,8 @@ interface Props {
   onZoomChange: (z: number) => void;
   onBrushSizeChange: (s: number) => void;
   onBrushShapeChange: (s: BrushShape) => void;
+  onBrushAntiAliasChange: (v: boolean) => void;
+  onCrispEdgesChange: (v: boolean) => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -35,6 +37,8 @@ export function TileEditor({
   onZoomChange,
   onBrushSizeChange,
   onBrushShapeChange,
+  onBrushAntiAliasChange,
+  onCrispEdgesChange,
   onUndo,
   onRedo,
   canUndo,
@@ -61,13 +65,17 @@ export function TileEditor({
         zoom={editor.zoom}
         canUndo={canUndo}
         canRedo={canRedo}
+        crispEdges={editor.crispEdges}
         brushSize={editor.brushSize}
         brushShape={editor.brushShape}
+        brushAntiAlias={editor.brushAntiAlias}
         onToolChange={onToolChange}
         onColorChange={onColorChange}
         onZoomChange={onZoomChange}
         onBrushSizeChange={onBrushSizeChange}
         onBrushShapeChange={onBrushShapeChange}
+        onBrushAntiAliasChange={onBrushAntiAliasChange}
+        onCrispEdgesChange={onCrispEdgesChange}
         onUndo={onUndo}
         onRedo={onRedo}
       />

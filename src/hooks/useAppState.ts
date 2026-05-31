@@ -21,6 +21,8 @@ function defaultEditorState(squishY: number): EditorState {
     zoom: 5,
     brushSize: 1,
     brushShape: 'circle' as BrushShape,
+    brushAntiAlias: false,
+    crispEdges: false,
     previewSquishY: squishY,
   };
 }
@@ -49,6 +51,8 @@ type Action =
   | { type: 'SET_ZOOM'; zoom: number }
   | { type: 'SET_BRUSH_SIZE'; size: number }
   | { type: 'SET_BRUSH_SHAPE'; shape: BrushShape }
+  | { type: 'SET_BRUSH_ANTI_ALIAS'; enabled: boolean }
+  | { type: 'SET_CRISP_EDGES'; enabled: boolean }
   | { type: 'SET_PREVIEW_SQUISH_Y'; value: number }
   | { type: 'UNDO' }
   | { type: 'REDO' };
@@ -176,6 +180,12 @@ function reducer(state: State, action: Action): State {
 
     case 'SET_BRUSH_SHAPE':
       return { ...state, editor: { ...state.editor, brushShape: action.shape } };
+
+    case 'SET_BRUSH_ANTI_ALIAS':
+      return { ...state, editor: { ...state.editor, brushAntiAlias: action.enabled } };
+
+    case 'SET_CRISP_EDGES':
+      return { ...state, editor: { ...state.editor, crispEdges: action.enabled } };
 
     case 'SET_PREVIEW_SQUISH_Y':
       return { ...state, editor: { ...state.editor, previewSquishY: action.value } };
@@ -352,6 +362,8 @@ export function useAppState() {
   const setZoom = useCallback((zoom: number) => dispatch({ type: 'SET_ZOOM', zoom }), []);
   const setBrushSize = useCallback((size: number) => dispatch({ type: 'SET_BRUSH_SIZE', size }), []);
   const setBrushShape = useCallback((shape: BrushShape) => dispatch({ type: 'SET_BRUSH_SHAPE', shape }), []);
+  const setBrushAntiAlias = useCallback((enabled: boolean) => dispatch({ type: 'SET_BRUSH_ANTI_ALIAS', enabled }), []);
+  const setCrispEdges = useCallback((enabled: boolean) => dispatch({ type: 'SET_CRISP_EDGES', enabled }), []);
   const setPreviewSquishY = useCallback((value: number) => dispatch({ type: 'SET_PREVIEW_SQUISH_Y', value }), []);
   const undo = useCallback(() => dispatch({ type: 'UNDO' }), []);
   const redo = useCallback(() => dispatch({ type: 'REDO' }), []);
@@ -371,6 +383,8 @@ export function useAppState() {
     setZoom,
     setBrushSize,
     setBrushShape,
+    setBrushAntiAlias,
+    setCrispEdges,
     setPreviewSquishY,
     undo,
     redo,

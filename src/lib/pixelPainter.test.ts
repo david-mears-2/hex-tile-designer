@@ -44,6 +44,26 @@ describe('rgbaToHex', () => {
   });
 });
 
+describe('getBrushCoverage', () => {
+  it('size 1 is a single fully-covered pixel', () => {
+    expect(getBrushCoverage(1, 'circle')).toEqual([[0, 0, 1]]);
+  });
+
+  it('square gives full coverage at every pixel', () => {
+    const cov = getBrushCoverage(3, 'square');
+    expect(cov.every(([, , c]) => c === 1)).toBe(true);
+  });
+
+  it('circle centre is full while the edge fades below 1', () => {
+    const cov = getBrushCoverage(3, 'circle');
+    const centre = cov.find(([dx, dy]) => dx === 0 && dy === 0);
+    const edge = cov.find(([dx, dy]) => dx === 2 && dy === 0);
+    expect(centre?.[2]).toBe(1);
+    expect(edge?.[2]).toBeGreaterThan(0);
+    expect(edge?.[2]).toBeLessThan(1);
+  });
+});
+
 describe('floodFill', () => {
   it('fills connected region of matching color', () => {
     const { width, height } = hexBBox(cfg);

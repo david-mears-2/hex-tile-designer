@@ -20,6 +20,8 @@ export interface EditorState {
   zoom: number;
   brushSize: number;
   brushShape: BrushShape;
+  brushAntiAlias: boolean;
+  crispEdges: boolean;
   previewSquishY: number;
 }
 

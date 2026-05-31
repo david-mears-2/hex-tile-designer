@@ -27,6 +27,8 @@ export function App() {
     setZoom,
     setBrushSize,
     setBrushShape,
+    setBrushAntiAlias,
+    setCrispEdges,
     setPreviewSquishY,
     undo,
     redo,
@@ -91,6 +93,8 @@ export function App() {
           onZoomChange={setZoom}
           onBrushSizeChange={setBrushSize}
           onBrushShapeChange={setBrushShape}
+          onBrushAntiAliasChange={setBrushAntiAlias}
+          onCrispEdgesChange={setCrispEdges}
           onUndo={undo}
           onRedo={redo}
           canUndo={state.undoStack.some(e =>

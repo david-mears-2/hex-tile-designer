@@ -25,6 +25,7 @@ interface Props {
   crispEdges: boolean;
   brushSize: number;
   brushShape: BrushShape;
+  brushAntiAlias: boolean;
   onToolChange: (t: ToolType) => void;
   onColorChange: (c: string) => void;
   onZoomChange: (z: number) => void;
@@ -33,12 +34,13 @@ interface Props {
   onCrispEdgesChange: (v: boolean) => void;
   onBrushSizeChange: (s: number) => void;
   onBrushShapeChange: (s: BrushShape) => void;
+  onBrushAntiAliasChange: (v: boolean) => void;
 }
 
 export function EditorToolbar({
-  activeTool, activeColor, zoom, canUndo, canRedo, crispEdges, brushSize, brushShape,
+  activeTool, activeColor, zoom, canUndo, canRedo, crispEdges, brushSize, brushShape, brushAntiAlias,
   onToolChange, onColorChange, onZoomChange, onUndo, onRedo, onCrispEdgesChange,
-  onBrushSizeChange, onBrushShapeChange,
+  onBrushSizeChange, onBrushShapeChange, onBrushAntiAliasChange,
 }: Props) {
   const showBrush = activeTool === 'pencil' || activeTool === 'eraser';
 
@@ -96,6 +98,14 @@ export function EditorToolbar({
               </button>
             );
           })}
+          <button
+            className={`brush-btn brush-btn--shape${brushAntiAlias ? ' brush-btn--active' : ''}`}
+            title={brushAntiAlias ? 'Brush edges: anti-aliased' : 'Brush edges: hard'}
+            aria-pressed={brushAntiAlias}
+            onClick={() => onBrushAntiAliasChange(!brushAntiAlias)}
+          >
+            ◌
+          </button>
         </div>
       )}
 
