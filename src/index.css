@@ -435,9 +435,13 @@ input[type='range'] {
 /* ── Atlas preview ───────────────────────────── */
 .atlas-preview__scroll {
   flex: 1;
-  overflow: auto;
   min-height: 0;
-  padding: 6px 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.atlas-preview__scroll canvas {
+  display: block;
 }
 
 /* ── Dialog ──────────────────────────────────── */
