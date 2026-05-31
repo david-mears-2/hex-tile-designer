@@ -114,9 +114,6 @@ export function useTessellationPreview(
             ctx.drawImage(offscreenRef.current!, cx - bbox.width / 2, cy - bbox.height / 2);
           }
           ctx.restore();
-          ctx.strokeStyle = 'rgba(180, 180, 180, 0.25)';
-          ctx.lineWidth = 1;
-          ctx.stroke(clipPath);
         }
       }
 
