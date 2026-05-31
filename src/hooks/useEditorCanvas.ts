@@ -76,7 +76,8 @@ function renderCanvas(
   tile: TileType | null,
   hexConfig: HexConfig,
   offscreen: HTMLCanvasElement,
-  crispEdges: boolean
+  crispEdges: boolean,
+  bgColor: string
 ): void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -86,7 +87,7 @@ function renderCanvas(
   const cy = height / 2;
 
   ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = '#3a3a3a';
+  ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, width, height);
 
   if (crispEdges) {
@@ -142,8 +143,8 @@ export function useEditorCanvas({
     const canvas = canvasRef.current;
     const offscreen = offscreenRef.current;
     if (!canvas || !offscreen) return;
-    renderCanvas(canvas, tile, hexConfig, offscreen, editor.crispEdges);
-  }, [canvasRef, tile, hexConfig, editor.crispEdges]);
+    renderCanvas(canvas, tile, hexConfig, offscreen, editor.crispEdges, editor.editorBgColor);
+  }, [canvasRef, tile, hexConfig, editor.crispEdges, editor.editorBgColor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -242,7 +243,7 @@ export function useEditorCanvas({
       if (!ctx) return;
 
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = '#3a3a3a';
+      ctx.fillStyle = editor.editorBgColor;
       ctx.fillRect(0, 0, width, height);
 
       if (editor.crispEdges) {

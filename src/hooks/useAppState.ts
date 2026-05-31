@@ -23,6 +23,7 @@ function defaultEditorState(squishY: number): EditorState {
     brushShape: 'circle' as BrushShape,
     brushAntiAlias: false,
     crispEdges: false,
+    editorBgColor: '#3a3a3a',
     previewSquishY: squishY,
   };
 }
@@ -53,6 +54,7 @@ type Action =
   | { type: 'SET_BRUSH_SHAPE'; shape: BrushShape }
   | { type: 'SET_BRUSH_ANTI_ALIAS'; enabled: boolean }
   | { type: 'SET_CRISP_EDGES'; enabled: boolean }
+  | { type: 'SET_EDITOR_BG_COLOR'; color: string }
   | { type: 'SET_PREVIEW_SQUISH_Y'; value: number }
   | { type: 'UNDO' }
   | { type: 'REDO' };
@@ -186,6 +188,9 @@ function reducer(state: State, action: Action): State {
 
     case 'SET_CRISP_EDGES':
       return { ...state, editor: { ...state.editor, crispEdges: action.enabled } };
+
+    case 'SET_EDITOR_BG_COLOR':
+      return { ...state, editor: { ...state.editor, editorBgColor: action.color } };
 
     case 'SET_PREVIEW_SQUISH_Y':
       return { ...state, editor: { ...state.editor, previewSquishY: action.value } };
@@ -364,6 +369,7 @@ export function useAppState() {
   const setBrushShape = useCallback((shape: BrushShape) => dispatch({ type: 'SET_BRUSH_SHAPE', shape }), []);
   const setBrushAntiAlias = useCallback((enabled: boolean) => dispatch({ type: 'SET_BRUSH_ANTI_ALIAS', enabled }), []);
   const setCrispEdges = useCallback((enabled: boolean) => dispatch({ type: 'SET_CRISP_EDGES', enabled }), []);
+  const setEditorBgColor = useCallback((color: string) => dispatch({ type: 'SET_EDITOR_BG_COLOR', color }), []);
   const setPreviewSquishY = useCallback((value: number) => dispatch({ type: 'SET_PREVIEW_SQUISH_Y', value }), []);
   const undo = useCallback(() => dispatch({ type: 'UNDO' }), []);
   const redo = useCallback(() => dispatch({ type: 'REDO' }), []);
@@ -385,6 +391,7 @@ export function useAppState() {
     setBrushShape,
     setBrushAntiAlias,
     setCrispEdges,
+    setEditorBgColor,
     setPreviewSquishY,
     undo,
     redo,

@@ -29,6 +29,7 @@ export function App() {
     setBrushShape,
     setBrushAntiAlias,
     setCrispEdges,
+    setEditorBgColor,
     setPreviewSquishY,
     undo,
     redo,
@@ -94,6 +95,7 @@ export function App() {
           onBrushSizeChange={setBrushSize}
           onBrushShapeChange={setBrushShape}
           onBrushAntiAliasChange={setBrushAntiAlias}
+          onEditorBgColorChange={setEditorBgColor}
           onCrispEdgesChange={setCrispEdges}
           onUndo={undo}
           onRedo={redo}

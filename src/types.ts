@@ -22,6 +22,7 @@ export interface EditorState {
   brushShape: BrushShape;
   brushAntiAlias: boolean;
   crispEdges: boolean;
+  editorBgColor: string;
   previewSquishY: number;
 }
 

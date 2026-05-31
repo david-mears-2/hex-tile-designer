@@ -26,6 +26,7 @@ interface Props {
   brushSize: number;
   brushShape: BrushShape;
   brushAntiAlias: boolean;
+  editorBgColor: string;
   onToolChange: (t: ToolType) => void;
   onColorChange: (c: string) => void;
   onZoomChange: (z: number) => void;
@@ -35,12 +36,14 @@ interface Props {
   onBrushSizeChange: (s: number) => void;
   onBrushShapeChange: (s: BrushShape) => void;
   onBrushAntiAliasChange: (v: boolean) => void;
+  onEditorBgColorChange: (c: string) => void;
 }
 
 export function EditorToolbar({
   activeTool, activeColor, zoom, canUndo, canRedo, crispEdges, brushSize, brushShape, brushAntiAlias,
+  editorBgColor,
   onToolChange, onColorChange, onZoomChange, onUndo, onRedo, onCrispEdgesChange,
-  onBrushSizeChange, onBrushShapeChange, onBrushAntiAliasChange,
+  onBrushSizeChange, onBrushShapeChange, onBrushAntiAliasChange, onEditorBgColorChange,
 }: Props) {
   const showBrush = activeTool === 'pencil' || activeTool === 'eraser';
 
@@ -134,6 +137,14 @@ export function EditorToolbar({
         ↪
       </button>
       <div className="editor-toolbar__view">
+        <label className="editor-toolbar__color" title="Editor background colour">
+          <input
+            type="color"
+            value={editorBgColor}
+            onChange={e => onEditorBgColorChange(e.target.value)}
+          />
+          <span className="editor-toolbar__color-swatch" style={{ background: editorBgColor }} />
+        </label>
         <button
           className={`tool-btn${!crispEdges ? ' tool-btn--active' : ''}`}
           title={crispEdges ? 'Edge rendering: smooth (anti-aliased)' : 'Edge rendering: crisp (pixel-perfect)'}

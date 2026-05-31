@@ -18,6 +18,7 @@ interface Props {
   onBrushSizeChange: (s: number) => void;
   onBrushShapeChange: (s: BrushShape) => void;
   onBrushAntiAliasChange: (v: boolean) => void;
+  onEditorBgColorChange: (c: string) => void;
   onCrispEdgesChange: (v: boolean) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -38,6 +39,7 @@ export function TileEditor({
   onBrushSizeChange,
   onBrushShapeChange,
   onBrushAntiAliasChange,
+  onEditorBgColorChange,
   onCrispEdgesChange,
   onUndo,
   onRedo,
@@ -69,12 +71,14 @@ export function TileEditor({
         brushSize={editor.brushSize}
         brushShape={editor.brushShape}
         brushAntiAlias={editor.brushAntiAlias}
+        editorBgColor={editor.editorBgColor}
         onToolChange={onToolChange}
         onColorChange={onColorChange}
         onZoomChange={onZoomChange}
         onBrushSizeChange={onBrushSizeChange}
         onBrushShapeChange={onBrushShapeChange}
         onBrushAntiAliasChange={onBrushAntiAliasChange}
+        onEditorBgColorChange={onEditorBgColorChange}
         onCrispEdgesChange={onCrispEdgesChange}
         onUndo={onUndo}
         onRedo={onRedo}
