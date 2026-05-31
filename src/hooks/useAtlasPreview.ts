@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import type { TileType, HexConfig, EditorState, AtlasLayout } from '../types';
-import { hexBBox, hexPath2D } from '../lib/hexGeometry';
+import { hexBBox } from '../lib/hexGeometry';
 import { buildAtlasImageData } from '../lib/atlasLayout';
 
 export function useTessellationPreview(
@@ -36,12 +36,14 @@ export function useTessellationPreview(
       const stepX = r * 1.5;
       const stepY = r * sy * Math.sqrt(3);
 
-      // Scale tiles so 5 columns exactly span the container width; ROWS fill height
+      // Scale tiles so 5 columns exactly span the container width; ROWS fill height.
+      // fitScale is derived from the panel width (not a user zoom control): tiles
+      // resize automatically when the right column is dragged wider or narrower.
       const nativeW5 = 4 * stepX + bbox.width;
-      const zoom = W / nativeW5;
+      const fitScale = W / nativeW5;
 
       const COLS = 5;
-      const ROWS = Math.max(2, Math.ceil((H / zoom - bbox.height - stepY / 2) / stepY) + 2);
+      const ROWS = Math.max(2, Math.ceil((H / fitScale - bbox.height - stepY / 2) / stepY) + 2);
 
       canvas.width = W;
       canvas.height = H;
@@ -70,7 +72,7 @@ export function useTessellationPreview(
       const scaleY = designSquishY === 0 ? 1 : squishY / designSquishY;
       const hasSquish = Math.abs(scaleY - 1) > 0.001;
 
-      const visH = H / zoom;
+      const visH = H / fitScale;
       const yMid = visH / 2;
       // SkewX shifts whole rows horizontally to keep the lattice tessellating:
       // rows above the vertical centre move right, rows below move left. This is a
@@ -81,9 +83,9 @@ export function useTessellationPreview(
         : Math.ceil((Math.abs(skewX) * yMid) / stepX) + 1;
       const entryCount = layout.entries.length;
 
-      // Apply zoom: tile coordinates are in native units; ctx.scale maps them to screen.
+      // Apply fit scale: tile coordinates are in native units; ctx.scale maps them to screen.
       ctx.save();
-      ctx.scale(zoom, zoom);
+      ctx.scale(fitScale, fitScale);
       ctx.transform(1, 0, -skewX, 1, skewX * yMid, 0); // global skew shear
 
       for (let col = -extraCols; col < COLS + extraCols; col++) {
@@ -101,23 +103,21 @@ export function useTessellationPreview(
             0, 0, bbox.width, bbox.height,
           );
 
-          // The hex shape carries only the preview squish; the global shear above
-          // applies the skew to both the cell shape and its row position.
-          const clipPath = hexPath2D(hexConfig, cx, cy, { squishY });
-          ctx.save();
-          ctx.clip(clipPath);
+          // Tiles are already hex-masked (transparent outside the hex), so no clip
+          // is needed; the global shear above applies skew to every tile's position.
           if (hasSquish) {
+            ctx.save();
             ctx.translate(cx, cy);
-            ctx.transform(1, 0, 0, scaleY, 0, 0);
+            ctx.transform(1, 0, 0, scaleY, 0, 0); // preview squish about the cell centre
             ctx.drawImage(offscreenRef.current!, -bbox.width / 2, -bbox.height / 2);
+            ctx.restore();
           } else {
             ctx.drawImage(offscreenRef.current!, cx - bbox.width / 2, cy - bbox.height / 2);
           }
-          ctx.restore();
         }
       }
 
-      ctx.restore(); // end zoom + shear
+      ctx.restore(); // end fit scale + shear
     }
 
     let raf = 0;
