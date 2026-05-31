@@ -149,6 +149,67 @@ describe('useAppState', () => {
     expect(tile.pixels.every(v => v === 0)).toBe(true);
   });
 
+  it('undo skips other tiles\' history to reach the active tile\'s most recent entry', () => {
+    const { result } = renderHook(() => useAppState());
+    const [tileA, tileB] = result.current.state.tileTypes;
+
+    const bPrev = tileB.pixels.slice() as Uint8ClampedArray;
+    const bNext = new Uint8ClampedArray(bPrev.length); bNext.fill(22);
+    act(() => result.current.setActiveTile(tileB.id));
+    act(() => result.current.commitPixels(tileB.id, bNext, bPrev));
+
+    const aPrev = tileA.pixels.slice() as Uint8ClampedArray;
+    const aNext = new Uint8ClampedArray(aPrev.length); aNext.fill(11);
+    act(() => result.current.setActiveTile(tileA.id));
+    act(() => result.current.commitPixels(tileA.id, aNext, aPrev));
+
+    // undoStack = [paint(A), paint(B)]; active = A
+    act(() => result.current.undo());
+    expect(result.current.state.tileTypes[0].pixels[0]).toBe(0);  // A restored
+    expect(result.current.state.tileTypes[1].pixels[0]).toBe(22); // B untouched
+    expect(result.current.state.redoStack).toHaveLength(1);
+  });
+
+  it('undo does nothing when no entries exist for the active tile', () => {
+    const { result } = renderHook(() => useAppState());
+    const [tileA, tileB] = result.current.state.tileTypes;
+
+    const bPrev = tileB.pixels.slice() as Uint8ClampedArray;
+    const bNext = new Uint8ClampedArray(bPrev.length); bNext.fill(33);
+    act(() => result.current.setActiveTile(tileB.id));
+    act(() => result.current.commitPixels(tileB.id, bNext, bPrev));
+
+    // Switch to A which has no history; undo should be a no-op
+    act(() => result.current.setActiveTile(tileA.id));
+    act(() => result.current.undo());
+    expect(result.current.state.tileTypes[1].pixels[0]).toBe(33); // B unchanged
+    expect(result.current.state.undoStack).toHaveLength(1);       // stack unchanged
+  });
+
+  it('new paint clears redo for that tile only', () => {
+    const { result } = renderHook(() => useAppState());
+    const [tileA, tileB] = result.current.state.tileTypes;
+
+    // Paint A, then undo → A's entry enters redoStack
+    const aPrev = tileA.pixels.slice() as Uint8ClampedArray;
+    const aNext = new Uint8ClampedArray(aPrev.length); aNext.fill(5);
+    act(() => result.current.setActiveTile(tileA.id));
+    act(() => result.current.commitPixels(tileA.id, aNext, aPrev));
+    act(() => result.current.undo());
+    expect(result.current.state.redoStack).toHaveLength(1);
+
+    // Paint B → should NOT clear A's redo entry
+    const bPrev = tileB.pixels.slice() as Uint8ClampedArray;
+    const bNext = new Uint8ClampedArray(bPrev.length); bNext.fill(7);
+    act(() => result.current.commitPixels(tileB.id, bNext, bPrev));
+    expect(result.current.state.redoStack).toHaveLength(1); // A's entry still there
+
+    // Paint A again → should clear A's redo entry
+    const aNext2 = new Uint8ClampedArray(aPrev.length); aNext2.fill(9);
+    act(() => result.current.commitPixels(tileA.id, aNext2, aPrev));
+    expect(result.current.state.redoStack).toHaveLength(0);
+  });
+
   it('undo reverses paint action', () => {
     const { result } = renderHook(() => useAppState());
     const id = result.current.state.tileTypes[0].id;

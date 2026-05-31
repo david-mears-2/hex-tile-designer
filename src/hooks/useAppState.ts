@@ -30,6 +30,7 @@ interface State {
   tileTypes: TileType[];
   editor: EditorState;
   undoStack: UndoEntry[];
+  redoStack: UndoEntry[];
   pendingHexConfig: HexConfig | null;
 }
 
@@ -77,6 +78,7 @@ function reducer(state: State, action: Action): State {
         type: 'configClear',
         prevConfig: state.hexConfig,
         prevPixelsByTile,
+        nextConfig: newConfig,
       };
 
       return {
@@ -92,6 +94,7 @@ function reducer(state: State, action: Action): State {
           previewSquishY: newConfig.squishY,
         },
         undoStack: [undoEntry, ...state.undoStack].slice(0, 50),
+        redoStack: [], // configClear invalidates all redo history
       };
     }
 
@@ -140,6 +143,7 @@ function reducer(state: State, action: Action): State {
         type: 'paint',
         tileId: action.tileId,
         prevPixels: action.prevPixels,
+        nextPixels: action.pixels,
       };
       return {
         ...state,
@@ -147,6 +151,10 @@ function reducer(state: State, action: Action): State {
           t.id === action.tileId ? { ...t, pixels: action.pixels } : t
         ),
         undoStack: [undoEntry, ...state.undoStack].slice(0, 50),
+        // Clear redo for this tile only; preserve redo for other tiles
+        redoStack: state.redoStack.filter(e =>
+          e.type === 'configClear' || e.tileId !== action.tileId
+        ),
       };
     }
 
@@ -169,13 +177,26 @@ function reducer(state: State, action: Action): State {
       return { ...state, editor: { ...state.editor, previewSquishY: action.value } };
 
     case 'UNDO': {
-      if (state.undoStack.length === 0) return state;
-      const [entry, ...rest] = state.undoStack;
+      const activeTileId = state.editor.activeTileId;
+      // Find the most recent entry that affects the active tile.
+      // configClear entries are always eligible (they affect all tiles).
+      const idx = state.undoStack.findIndex(e =>
+        e.type === 'configClear' || e.tileId === activeTileId
+      );
+      if (idx === -1) return state;
+
+      const entry = state.undoStack[idx];
+      const newUndoStack = [
+        ...state.undoStack.slice(0, idx),
+        ...state.undoStack.slice(idx + 1),
+      ];
+      const newRedoStack = [entry, ...state.redoStack].slice(0, 50);
 
       if (entry.type === 'paint') {
         return {
           ...state,
-          undoStack: rest,
+          undoStack: newUndoStack,
+          redoStack: newRedoStack,
           tileTypes: state.tileTypes.map(t =>
             t.id === entry.tileId ? { ...t, pixels: entry.prevPixels } : t
           ),
@@ -187,7 +208,8 @@ function reducer(state: State, action: Action): State {
         const fallbackPixels = new Uint8ClampedArray(prevBbox.width * prevBbox.height * 4);
         return {
           ...state,
-          undoStack: rest,
+          undoStack: newUndoStack,
+          redoStack: newRedoStack,
           hexConfig: entry.prevConfig,
           tileTypes: state.tileTypes.map(t => ({
             ...t,
@@ -222,6 +244,7 @@ function buildInitialState(): State {
         activeTool: saved.activeTool,
       },
       undoStack: [],
+      redoStack: [],
       pendingHexConfig: null,
     };
   }
@@ -234,6 +257,7 @@ function buildInitialState(): State {
     tileTypes: tiles,
     editor: { ...defaultEditorState(DEFAULT_HEX_CONFIG.squishY), activeTileId: tiles[0].id },
     undoStack: [],
+    redoStack: [],
     pendingHexConfig: null,
   };
 }

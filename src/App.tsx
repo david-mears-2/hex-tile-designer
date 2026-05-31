@@ -87,7 +87,9 @@ export function App() {
           onBrushSizeChange={setBrushSize}
           onBrushShapeChange={setBrushShape}
           onUndo={undo}
-          canUndo={state.undoStack.length > 0}
+          canUndo={state.undoStack.some(e =>
+            e.type === 'configClear' || e.tileId === editor.activeTileId
+          )}
         />
       </main>
       <div className="column-divider" onPointerDown={onRightDividerDown} />

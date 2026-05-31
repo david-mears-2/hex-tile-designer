@@ -24,8 +24,8 @@ export interface EditorState {
 }
 
 export type UndoEntry =
-  | { type: 'paint'; tileId: string; prevPixels: Uint8ClampedArray }
-  | { type: 'configClear'; prevConfig: HexConfig; prevPixelsByTile: Record<string, Uint8ClampedArray> }
+  | { type: 'paint'; tileId: string; prevPixels: Uint8ClampedArray; nextPixels: Uint8ClampedArray }
+  | { type: 'configClear'; prevConfig: HexConfig; prevPixelsByTile: Record<string, Uint8ClampedArray>; nextConfig: HexConfig }
 
 export interface AtlasTileEntry {
   tileId: string;
