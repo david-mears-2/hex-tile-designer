@@ -17,7 +17,7 @@ export interface EditorState {
   activeTool: ToolType;
   activeColor: string;
   zoom: number;
-  previewSkew: boolean;
+  brushSize: number;
   previewSquishY: number;
 }
 

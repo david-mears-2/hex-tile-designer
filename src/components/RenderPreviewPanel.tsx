@@ -4,7 +4,6 @@ interface Props {
   hexConfig: HexConfig;
   editor: EditorState;
   onSkewChange: (v: number) => void;
-  onTogglePreviewSkew: (v: boolean) => void;
   onPreviewSquishYChange: (v: number) => void;
 }
 
@@ -12,7 +11,6 @@ export function RenderPreviewPanel({
   hexConfig,
   editor,
   onSkewChange,
-  onTogglePreviewSkew,
   onPreviewSquishYChange,
 }: Props) {
   return (
@@ -29,15 +27,6 @@ export function RenderPreviewPanel({
           value={hexConfig.skewX}
           onChange={e => onSkewChange(Number(e.target.value))}
         />
-      </label>
-
-      <label className="control-row control-row--checkbox">
-        <input
-          type="checkbox"
-          checked={editor.previewSkew}
-          onChange={e => onTogglePreviewSkew(e.target.checked)}
-        />
-        <span>Show skew preview</span>
       </label>
 
       <label className="control-row">

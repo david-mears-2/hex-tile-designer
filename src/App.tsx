@@ -24,7 +24,7 @@ export function App() {
     setTool,
     setColor,
     setZoom,
-    setPreviewSkew,
+    setBrushSize,
     setPreviewSquishY,
     undo,
   } = useAppState();
@@ -87,7 +87,6 @@ export function App() {
           hexConfig={hexConfig}
           editor={editor}
           onSkewChange={v => setHexConfig({ skewX: v })}
-          onTogglePreviewSkew={setPreviewSkew}
           onPreviewSquishYChange={setPreviewSquishY}
         />
         <AtlasPreview

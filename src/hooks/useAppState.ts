@@ -19,7 +19,7 @@ function defaultEditorState(squishY: number): EditorState {
     activeTool: 'pencil',
     activeColor: '#3a7bd5',
     zoom: 5,
-    previewSkew: false,
+    brushSize: 1,
     previewSquishY: squishY,
   };
 }
@@ -45,7 +45,7 @@ type Action =
   | { type: 'SET_TOOL'; tool: ToolType }
   | { type: 'SET_COLOR'; color: string }
   | { type: 'SET_ZOOM'; zoom: number }
-  | { type: 'SET_PREVIEW_SKEW'; enabled: boolean }
+  | { type: 'SET_BRUSH_SIZE'; size: number }
   | { type: 'SET_PREVIEW_SQUISH_Y'; value: number }
   | { type: 'UNDO' };
 
@@ -157,8 +157,8 @@ function reducer(state: State, action: Action): State {
     case 'SET_ZOOM':
       return { ...state, editor: { ...state.editor, zoom: Math.max(1, Math.min(24, action.zoom)) } };
 
-    case 'SET_PREVIEW_SKEW':
-      return { ...state, editor: { ...state.editor, previewSkew: action.enabled } };
+    case 'SET_BRUSH_SIZE':
+      return { ...state, editor: { ...state.editor, brushSize: action.size } };
 
     case 'SET_PREVIEW_SQUISH_Y':
       return { ...state, editor: { ...state.editor, previewSquishY: action.value } };
@@ -270,7 +270,7 @@ export function useAppState() {
   const setTool = useCallback((tool: ToolType) => dispatch({ type: 'SET_TOOL', tool }), []);
   const setColor = useCallback((color: string) => dispatch({ type: 'SET_COLOR', color }), []);
   const setZoom = useCallback((zoom: number) => dispatch({ type: 'SET_ZOOM', zoom }), []);
-  const setPreviewSkew = useCallback((enabled: boolean) => dispatch({ type: 'SET_PREVIEW_SKEW', enabled }), []);
+  const setBrushSize = useCallback((size: number) => dispatch({ type: 'SET_BRUSH_SIZE', size }), []);
   const setPreviewSquishY = useCallback((value: number) => dispatch({ type: 'SET_PREVIEW_SQUISH_Y', value }), []);
   const undo = useCallback(() => dispatch({ type: 'UNDO' }), []);
 
@@ -287,7 +287,7 @@ export function useAppState() {
     setTool,
     setColor,
     setZoom,
-    setPreviewSkew,
+    setBrushSize,
     setPreviewSquishY,
     undo,
   };
