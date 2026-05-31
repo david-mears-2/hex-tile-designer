@@ -372,6 +372,28 @@ input[type='range'] {
   color: var(--text-muted);
 }
 
+/* ── Reset button ────────────────────────────── */
+.reset-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 2px;
+  line-height: 1;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.reset-btn:not(:disabled):hover {
+  color: var(--accent);
+}
+
+.reset-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
 /* ── Brush size ──────────────────────────────── */
 .brush-size-group {
   display: flex;
