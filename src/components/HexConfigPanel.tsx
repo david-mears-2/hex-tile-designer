@@ -12,7 +12,7 @@ export function HexConfigPanel({ hexConfig, onChange }: Props) {
       <label className="control-row">
         <span className="control-row__label">Radius <strong>{hexConfig.radius}px</strong></span>
         <input
-          type="range" min={8} max={64} step={1}
+          type="range" min={8} max={128} step={1}
           value={hexConfig.radius}
           onChange={e => onChange({ radius: Number(e.target.value) })}
         />

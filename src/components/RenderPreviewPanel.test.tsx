@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { RenderPreviewPanel } from './RenderPreviewPanel';
 import type { EditorState } from '../types';
 
-const hexConfig = { radius: 32, squishY: 0.75, skewX: 0 };
+const hexConfig = { radius: 128, squishY: 0.75, skewX: 0 };
 
 const editor: EditorState = {
   activeTileId: null,
