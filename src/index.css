@@ -325,6 +325,15 @@ input[type='range'] {
   border-color: var(--accent);
 }
 
+/* Undo/redo: text label spells out that history is scoped to the active tile. */
+.tool-btn--labeled {
+  width: auto;
+  padding: 0 12px;
+  gap: 6px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
 .editor-toolbar__color {
   display: flex;
   align-items: center;

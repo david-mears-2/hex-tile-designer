@@ -121,20 +121,20 @@ export function EditorToolbar({
         <span className="editor-toolbar__color-swatch" style={{ background: activeColor }} />
       </label>
       <button
-        className="tool-btn"
-        title="Undo (Ctrl+Z)"
+        className="tool-btn tool-btn--labeled"
+        title="Undo the last change to this tile (Ctrl+Z). Undo is per-tile."
         onClick={onUndo}
         disabled={!canUndo}
       >
-        ↩
+        ↩ Undo tile
       </button>
       <button
-        className="tool-btn"
-        title="Redo (Ctrl+Y)"
+        className="tool-btn tool-btn--labeled"
+        title="Redo the last undone change to this tile (Ctrl+Y). Redo is per-tile."
         onClick={onRedo}
         disabled={!canRedo}
       >
-        ↪
+        ↪ Redo tile
       </button>
       <div className="editor-toolbar__view">
         <label className="editor-toolbar__color" title="Editor background colour">
