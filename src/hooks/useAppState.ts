@@ -5,6 +5,10 @@ import { saveState, loadState } from '../lib/storage';
 
 const DEFAULT_HEX_CONFIG: HexConfig = { radius: 32, squishY: 0.75, skewX: 0 };
 
+// Max undo/redo entries kept per stack. Each paint entry holds two full pixel
+// buffers, so at large hex radii this bounds memory; 30 strokes is ample history.
+const MAX_HISTORY = 30;
+
 function makeBlankTile(name: string, pixelCount: number): TileType {
   return {
     id: crypto.randomUUID(),
@@ -100,7 +104,7 @@ function reducer(state: State, action: Action): State {
           ...state.editor,
           previewSquishY: newConfig.squishY,
         },
-        undoStack: [undoEntry, ...state.undoStack].slice(0, 50),
+        undoStack: [undoEntry, ...state.undoStack].slice(0, MAX_HISTORY),
         redoStack: [], // configClear invalidates all redo history
       };
     }
@@ -159,7 +163,7 @@ function reducer(state: State, action: Action): State {
         tileTypes: state.tileTypes.map(t =>
           t.id === action.tileId ? { ...t, pixels: action.pixels } : t
         ),
-        undoStack: [undoEntry, ...state.undoStack].slice(0, 50),
+        undoStack: [undoEntry, ...state.undoStack].slice(0, MAX_HISTORY),
         // Clear redo for this tile only; preserve redo for other tiles
         redoStack: state.redoStack.filter(e =>
           e.type === 'configClear' || e.tileId !== action.tileId
@@ -208,7 +212,7 @@ function reducer(state: State, action: Action): State {
         ...state.undoStack.slice(0, idx),
         ...state.undoStack.slice(idx + 1),
       ];
-      const newRedoStack = [entry, ...state.redoStack].slice(0, 50);
+      const newRedoStack = [entry, ...state.redoStack].slice(0, MAX_HISTORY);
 
       if (entry.type === 'paint') {
         return {
@@ -255,7 +259,7 @@ function reducer(state: State, action: Action): State {
         ...state.redoStack.slice(0, idx),
         ...state.redoStack.slice(idx + 1),
       ];
-      const newUndoStack = [entry, ...state.undoStack].slice(0, 50);
+      const newUndoStack = [entry, ...state.undoStack].slice(0, MAX_HISTORY);
 
       if (entry.type === 'paint') {
         return {
