@@ -48,8 +48,9 @@ export interface AtlasLayout {
 }
 
 export interface AtlasMetadata {
-  version: 2;
+  version: 1;
   hexConfig: HexConfig;
-  // Keyed by stable tile id (names can change); the display name is a property.
+  // Keyed by a slug derived from the tile name (readable, asset-friendly); the
+  // original display name is kept as a property.
   tiles: Record<string, { name: string; x: number; y: number; width: number; height: number }>;
 }

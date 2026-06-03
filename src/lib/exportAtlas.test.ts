@@ -13,33 +13,36 @@ function layoutOf(entries: AtlasTileEntry[]): AtlasLayout {
 }
 
 describe('buildAtlasMetadata', () => {
-  it('stamps version 2 and echoes the hex config', () => {
+  it('stamps version 1 and echoes the hex config', () => {
     const meta = buildAtlasMetadata(hexConfig, layoutOf([entry('id-a', 'Grass', 1)]));
-    expect(meta.version).toBe(2);
+    expect(meta.version).toBe(1);
     expect(meta.hexConfig).toEqual(hexConfig);
   });
 
-  it('keys each tile by id, carrying the name and atlas rect', () => {
+  it('keys each tile by a name-derived slug, carrying name and rect', () => {
     const meta = buildAtlasMetadata(
       hexConfig,
-      layoutOf([entry('id-a', 'Grass', 1), entry('id-b', 'Water', 68)])
+      layoutOf([entry('id-a', 'Grass', 1), entry('id-b', 'Deep Water', 68)])
     );
     expect(meta.tiles).toEqual({
-      'id-a': { name: 'Grass', x: 1, y: 1, width: 66, height: 44 },
-      'id-b': { name: 'Water', x: 68, y: 1, width: 66, height: 44 },
+      grass: { name: 'Grass', x: 1, y: 1, width: 66, height: 44 },
+      'deep-water': { name: 'Deep Water', x: 68, y: 1, width: 66, height: 44 },
     });
   });
 
-  it('keeps same-named tiles distinct via their ids', () => {
+  it('suffixes slugs that collide so no entry is dropped', () => {
     const meta = buildAtlasMetadata(
       hexConfig,
-      layoutOf([entry('id-1', 'Grass', 1), entry('id-2', 'Grass', 68)])
+      layoutOf([entry('id-1', 'Deep Water', 1), entry('id-2', 'deep_water', 68)])
     );
-    expect(Object.keys(meta.tiles)).toEqual(['id-1', 'id-2']);
-    expect(meta.tiles['id-1'].x).toBe(1);
-    expect(meta.tiles['id-2'].x).toBe(68);
-    expect(meta.tiles['id-1'].name).toBe('Grass');
-    expect(meta.tiles['id-2'].name).toBe('Grass');
+    expect(Object.keys(meta.tiles)).toEqual(['deep-water', 'deep-water-2']);
+    expect(meta.tiles['deep-water'].x).toBe(1);
+    expect(meta.tiles['deep-water-2'].x).toBe(68);
+  });
+
+  it('falls back to "tile" when a name has no slug-safe characters', () => {
+    const meta = buildAtlasMetadata(hexConfig, layoutOf([entry('id-x', '!!!', 1)]));
+    expect(Object.keys(meta.tiles)).toEqual(['tile']);
   });
 
   it('produces an empty tiles map for an empty layout', () => {

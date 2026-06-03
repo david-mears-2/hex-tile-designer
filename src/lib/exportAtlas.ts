@@ -13,21 +13,35 @@ function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
-// Builds the atlas sidecar metadata: hex config plus an id -> { name, rect } lookup.
-// Keying by the stable tile id (rather than the editable name) keeps the mapping
-// unambiguous even if two tiles share a name, and stable across renames.
+// Converts a display name to an asset-friendly slug: lowercased, with runs of
+// non-alphanumeric characters collapsed to single hyphens. Falls back to "tile" when
+// the name contains no usable characters.
+function slugify(name: string): string {
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return slug || 'tile';
+}
+
+// Builds the atlas sidecar metadata: hex config plus a slug -> { name, rect } lookup.
+// Tiles are keyed by a name-derived slug so the game can reference them with readable
+// keys (e.g. atlas.tiles["deep-water"]). Names are unique in the UI, but if two ever
+// slugify to the same value the later occurrences are suffixed (-2, -3, …).
 export function buildAtlasMetadata(
   hexConfig: HexConfig,
   layout: AtlasLayout
 ): AtlasMetadata {
+  const slugCounts = new Map<string, number>();
   const metadata: AtlasMetadata = {
-    version: 2,
+    version: 1,
     hexConfig,
     tiles: {},
   };
 
   for (const entry of layout.entries) {
-    metadata.tiles[entry.tileId] = {
+    const base = slugify(entry.tileName);
+    const count = (slugCounts.get(base) ?? 0) + 1;
+    slugCounts.set(base, count);
+    const key = count === 1 ? base : `${base}-${count}`;
+    metadata.tiles[key] = {
       name: entry.tileName,
       x: entry.x,
       y: entry.y,
