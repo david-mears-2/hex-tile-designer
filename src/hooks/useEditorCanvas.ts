@@ -70,41 +70,41 @@ function drawContentCrisp(
   // No stroke: the hard pixel boundary against the dark background is the edge
 }
 
-function renderCanvas(
-  canvas: HTMLCanvasElement,
-  tile: TileType | null,
+// Paints one editor frame: dark background, then the tile pixels either crisp
+// (hard hex-masked buffer) or smooth (hex-clipped checkerboard + tile). Shared by
+// the reactive re-render and the live per-stroke redraw. A null `pixels` paints an
+// empty hex (checkerboard / dark background only).
+function paintCanvas(
+  ctx: CanvasRenderingContext2D,
+  pixels: Uint8ClampedArray | null,
   hexConfig: HexConfig,
+  width: number,
+  height: number,
   offscreen: HTMLCanvasElement,
   crispEdges: boolean,
   bgColor: string
 ): void {
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  const bbox = hexBBox(hexConfig);
-  const { width, height } = bbox;
-  const cx = width / 2;
-  const cy = height / 2;
-
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, width, height);
 
   if (crispEdges) {
-    drawContentCrisp(ctx, tile?.pixels ?? null, hexConfig, width, height, offscreen);
-  } else {
-    const hexPath = hexPath2D(hexConfig, cx, cy);
-    ctx.save();
-    ctx.clip(hexPath);
-    drawCheckerboard(ctx, width, height);
-    if (tile) {
-      const offCtx = offscreen.getContext('2d');
-      if (offCtx) {
-        offCtx.putImageData(new ImageData(new Uint8ClampedArray(tile.pixels), width, height), 0, 0);
-        ctx.drawImage(offscreen, 0, 0);
-      }
-    }
-    ctx.restore();
+    drawContentCrisp(ctx, pixels, hexConfig, width, height, offscreen);
+    return;
   }
+
+  const hexPath = hexPath2D(hexConfig, width / 2, height / 2);
+  ctx.save();
+  ctx.clip(hexPath);
+  drawCheckerboard(ctx, width, height);
+  if (pixels) {
+    const offCtx = offscreen.getContext('2d');
+    if (offCtx) {
+      offCtx.putImageData(new ImageData(new Uint8ClampedArray(pixels), width, height), 0, 0);
+      ctx.drawImage(offscreen, 0, 0);
+    }
+  }
+  ctx.restore();
 }
 
 export function useEditorCanvas({
@@ -138,7 +138,10 @@ export function useEditorCanvas({
     const canvas = canvasRef.current;
     const offscreen = offscreenRef.current;
     if (!canvas || !offscreen) return;
-    renderCanvas(canvas, tile, hexConfig, offscreen, editor.crispEdges, editor.editorBgColor);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const { width, height } = hexBBox(hexConfig);
+    paintCanvas(ctx, tile?.pixels ?? null, hexConfig, width, height, offscreen, editor.crispEdges, editor.editorBgColor);
   }, [canvasRef, tile, hexConfig, editor.crispEdges, editor.editorBgColor]);
 
   useEffect(() => {
@@ -236,27 +239,7 @@ export function useEditorCanvas({
       if (!offscreen || !canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = editor.editorBgColor;
-      ctx.fillRect(0, 0, width, height);
-
-      if (editor.crispEdges) {
-        drawContentCrisp(ctx, pixels, hexConfig, width, height, offscreen);
-      } else {
-        const cx = width / 2;
-        const cy = height / 2;
-        const hexPath = hexPath2D(hexConfig, cx, cy);
-        ctx.save();
-        ctx.clip(hexPath);
-        drawCheckerboard(ctx, width, height);
-        const offCtx = offscreen.getContext('2d');
-        if (offCtx) {
-          offCtx.putImageData(new ImageData(new Uint8ClampedArray(pixels), width, height), 0, 0);
-          ctx.drawImage(offscreen, 0, 0);
-        }
-        ctx.restore();
-      }
+      paintCanvas(ctx, pixels, hexConfig, width, height, offscreen, editor.crispEdges, editor.editorBgColor);
     }
 
     function onPointerDown(e: PointerEvent): void {
