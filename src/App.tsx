@@ -88,7 +88,6 @@ export function App() {
           editor={editor}
           onCommitPixels={commitPixels}
           onColorPick={setColor}
-          onPushUndo={() => {}}
           onToolChange={setTool}
           onColorChange={setColor}
           onZoomChange={setZoom}

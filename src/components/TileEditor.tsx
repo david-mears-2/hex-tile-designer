@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import type { TileType, HexConfig, EditorState, UndoEntry } from '../types';
+import type { TileType, HexConfig, EditorState } from '../types';
 import { hexBBox } from '../lib/hexGeometry';
 import { useEditorCanvas } from '../hooks/useEditorCanvas';
 import { EditorToolbar } from './EditorToolbar';
@@ -11,7 +11,6 @@ interface Props {
   editor: EditorState;
   onCommitPixels: (tileId: string, pixels: Uint8ClampedArray, prevPixels: Uint8ClampedArray) => void;
   onColorPick: (color: string) => void;
-  onPushUndo: (entry: UndoEntry) => void;
   onToolChange: (t: ToolType) => void;
   onColorChange: (c: string) => void;
   onZoomChange: (z: number) => void;
@@ -32,7 +31,6 @@ export function TileEditor({
   editor,
   onCommitPixels,
   onColorPick,
-  onPushUndo,
   onToolChange,
   onColorChange,
   onZoomChange,
@@ -56,7 +54,6 @@ export function TileEditor({
     editor,
     onCommitPixels,
     onColorPick,
-    onPushUndo,
   });
 
   return (

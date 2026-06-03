@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
-import type { TileType, HexConfig, EditorState, UndoEntry } from '../types';
+import type { TileType, HexConfig, EditorState } from '../types';
 import { hexBBox, hexPath2D, isInsideHex } from '../lib/hexGeometry';
 import { paintPixel, getPixel, parseColor, rgbaToHex, floodFill, getBrushOffsets, getBrushCoverage } from '../lib/pixelPainter';
 
@@ -11,7 +11,6 @@ interface UseEditorCanvasOptions {
   editor: EditorState;
   onCommitPixels: (tileId: string, pixels: Uint8ClampedArray, prevPixels: Uint8ClampedArray) => void;
   onColorPick: (color: string) => void;
-  onPushUndo: (entry: UndoEntry) => void;
 }
 
 const CHECKER_LIGHT = 204; // #cccccc
@@ -115,7 +114,6 @@ export function useEditorCanvas({
   editor,
   onCommitPixels,
   onColorPick,
-  onPushUndo: _onPushUndo,
 }: UseEditorCanvasOptions): void {
   const offscreenRef = useRef<HTMLCanvasElement | null>(null);
   const prevPixelsRef = useRef<Uint8ClampedArray | null>(null);
@@ -217,8 +215,8 @@ export function useEditorCanvas({
       x0: number, y0: number,
       x1: number, y1: number
     ): void {
-      let dx = Math.abs(x1 - x0);
-      let dy = Math.abs(y1 - y0);
+      const dx = Math.abs(x1 - x0);
+      const dy = Math.abs(y1 - y0);
       const sx = x0 < x1 ? 1 : -1;
       const sy = y0 < y1 ? 1 : -1;
       let err = dx - dy;
