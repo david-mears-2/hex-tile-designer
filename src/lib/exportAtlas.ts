@@ -13,25 +13,22 @@ function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
-// Builds the atlas sidecar metadata: hex config plus a name -> rect lookup. Tile
-// names are unique in the UI, but if duplicates ever reach here the second and
-// later occurrences are suffixed (_2, _3, …) so every entry keeps a distinct key.
+// Builds the atlas sidecar metadata: hex config plus an id -> { name, rect } lookup.
+// Keying by the stable tile id (rather than the editable name) keeps the mapping
+// unambiguous even if two tiles share a name, and stable across renames.
 export function buildAtlasMetadata(
   hexConfig: HexConfig,
   layout: AtlasLayout
 ): AtlasMetadata {
-  const nameCounts = new Map<string, number>();
   const metadata: AtlasMetadata = {
-    version: 1,
+    version: 2,
     hexConfig,
     tiles: {},
   };
 
   for (const entry of layout.entries) {
-    const count = (nameCounts.get(entry.tileName) ?? 0) + 1;
-    nameCounts.set(entry.tileName, count);
-    const key = count === 1 ? entry.tileName : `${entry.tileName}_${count}`;
-    metadata.tiles[key] = {
+    metadata.tiles[entry.tileId] = {
+      name: entry.tileName,
       x: entry.x,
       y: entry.y,
       width: entry.width,

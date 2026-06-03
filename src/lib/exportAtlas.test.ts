@@ -4,8 +4,8 @@ import type { AtlasLayout, AtlasTileEntry, HexConfig } from '../types';
 
 const hexConfig: HexConfig = { radius: 32, squishY: 0.75, skewX: 0.2 };
 
-function entry(tileName: string, x: number, y: number): AtlasTileEntry {
-  return { tileId: `${tileName}-${x}-${y}`, tileName, x, y, width: 66, height: 44 };
+function entry(tileId: string, tileName: string, x: number): AtlasTileEntry {
+  return { tileId, tileName, x, y: 1, width: 66, height: 44 };
 }
 
 function layoutOf(entries: AtlasTileEntry[]): AtlasLayout {
@@ -13,32 +13,33 @@ function layoutOf(entries: AtlasTileEntry[]): AtlasLayout {
 }
 
 describe('buildAtlasMetadata', () => {
-  it('stamps version 1 and echoes the hex config', () => {
-    const meta = buildAtlasMetadata(hexConfig, layoutOf([entry('Grass', 1, 1)]));
-    expect(meta.version).toBe(1);
+  it('stamps version 2 and echoes the hex config', () => {
+    const meta = buildAtlasMetadata(hexConfig, layoutOf([entry('id-a', 'Grass', 1)]));
+    expect(meta.version).toBe(2);
     expect(meta.hexConfig).toEqual(hexConfig);
   });
 
-  it('keys each tile by name with its atlas rect', () => {
+  it('keys each tile by id, carrying the name and atlas rect', () => {
     const meta = buildAtlasMetadata(
       hexConfig,
-      layoutOf([entry('Grass', 1, 1), entry('Water', 68, 1)])
+      layoutOf([entry('id-a', 'Grass', 1), entry('id-b', 'Water', 68)])
     );
     expect(meta.tiles).toEqual({
-      Grass: { x: 1, y: 1, width: 66, height: 44 },
-      Water: { x: 68, y: 1, width: 66, height: 44 },
+      'id-a': { name: 'Grass', x: 1, y: 1, width: 66, height: 44 },
+      'id-b': { name: 'Water', x: 68, y: 1, width: 66, height: 44 },
     });
   });
 
-  it('suffixes duplicate names so no entry is dropped', () => {
+  it('keeps same-named tiles distinct via their ids', () => {
     const meta = buildAtlasMetadata(
       hexConfig,
-      layoutOf([entry('Grass', 1, 1), entry('Grass', 68, 1), entry('Grass', 135, 1)])
+      layoutOf([entry('id-1', 'Grass', 1), entry('id-2', 'Grass', 68)])
     );
-    expect(Object.keys(meta.tiles)).toEqual(['Grass', 'Grass_2', 'Grass_3']);
-    expect(meta.tiles['Grass'].x).toBe(1);
-    expect(meta.tiles['Grass_2'].x).toBe(68);
-    expect(meta.tiles['Grass_3'].x).toBe(135);
+    expect(Object.keys(meta.tiles)).toEqual(['id-1', 'id-2']);
+    expect(meta.tiles['id-1'].x).toBe(1);
+    expect(meta.tiles['id-2'].x).toBe(68);
+    expect(meta.tiles['id-1'].name).toBe('Grass');
+    expect(meta.tiles['id-2'].name).toBe('Grass');
   });
 
   it('produces an empty tiles map for an empty layout', () => {
