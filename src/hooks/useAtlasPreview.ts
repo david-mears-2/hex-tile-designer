@@ -39,9 +39,11 @@ export function useTessellationPreview(
 
       const bbox = hexBBox(hexConfig);
       const r = hexConfig.radius;
-      const sy = hexConfig.squishY;
       const stepX = r * 1.5;
-      const stepY = r * sy * Math.sqrt(3);
+      // Row spacing follows the *preview* squish (not the stored design squish) so the
+      // lattice stays seamlessly tessellated while previewing a different squish: the
+      // per-tile vertical scale below and this step scale by the same factor.
+      const stepY = r * editor.previewSquishY * Math.sqrt(3);
 
       // Scale tiles so 5 columns exactly span the container width; ROWS fill height.
       // fitScale is derived from the panel width (not a user zoom control): tiles
@@ -98,6 +100,10 @@ export function useTessellationPreview(
 
       const dw = bbox.width + 2 * BLEED;
       const dh = bbox.height + 2 * BLEED;
+      // The squish branch scales the draw vertically by scaleY, which would shrink the
+      // vertical bleed too; pre-divide so the post-scale overlap stays ~BLEED px.
+      const vBleed = hasSquish ? BLEED / scaleY : BLEED;
+      const dhSquish = bbox.height + 2 * vBleed;
 
       for (let col = -extraCols; col < COLS + extraCols; col++) {
         for (let row = 0; row < ROWS; row++) {
@@ -116,7 +122,7 @@ export function useTessellationPreview(
             cctx.drawImage(
               atlas,
               entry.x, entry.y, bbox.width, bbox.height,
-              -bbox.width / 2 - BLEED, -bbox.height / 2 - BLEED, dw, dh,
+              -bbox.width / 2 - BLEED, -bbox.height / 2 - vBleed, dw, dhSquish,
             );
             cctx.restore();
           } else {
