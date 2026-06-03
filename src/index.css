@@ -315,9 +315,14 @@ input[type='range'] {
   justify-content: center;
 }
 
-.tool-btn:hover {
+.tool-btn:not(:disabled):hover {
   background: var(--surface-raised);
   border-color: var(--border);
+}
+
+.tool-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .tool-btn--active {
