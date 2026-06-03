@@ -13,6 +13,35 @@ function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
+// Builds the atlas sidecar metadata: hex config plus a name -> rect lookup. Tile
+// names are unique in the UI, but if duplicates ever reach here the second and
+// later occurrences are suffixed (_2, _3, …) so every entry keeps a distinct key.
+export function buildAtlasMetadata(
+  hexConfig: HexConfig,
+  layout: AtlasLayout
+): AtlasMetadata {
+  const nameCounts = new Map<string, number>();
+  const metadata: AtlasMetadata = {
+    version: 1,
+    hexConfig,
+    tiles: {},
+  };
+
+  for (const entry of layout.entries) {
+    const count = (nameCounts.get(entry.tileName) ?? 0) + 1;
+    nameCounts.set(entry.tileName, count);
+    const key = count === 1 ? entry.tileName : `${entry.tileName}_${count}`;
+    metadata.tiles[key] = {
+      x: entry.x,
+      y: entry.y,
+      width: entry.width,
+      height: entry.height,
+    };
+  }
+
+  return metadata;
+}
+
 export async function exportAtlas(
   tileTypes: TileType[],
   hexConfig: HexConfig,
@@ -34,24 +63,7 @@ export async function exportAtlas(
     }, 'image/png');
   });
 
-  const nameCounts = new Map<string, number>();
-  const metadata: AtlasMetadata = {
-    version: 1,
-    hexConfig,
-    tiles: {},
-  };
-
-  for (const entry of layout.entries) {
-    const count = (nameCounts.get(entry.tileName) ?? 0) + 1;
-    nameCounts.set(entry.tileName, count);
-    const key = count === 1 ? entry.tileName : `${entry.tileName}_${count}`;
-    metadata.tiles[key] = {
-      x: entry.x,
-      y: entry.y,
-      width: entry.width,
-      height: entry.height,
-    };
-  }
+  const metadata = buildAtlasMetadata(hexConfig, layout);
 
   const jsonBlob = new Blob([JSON.stringify(metadata, null, 2)], {
     type: 'application/json',
