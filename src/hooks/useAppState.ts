@@ -111,11 +111,10 @@ function reducer(state: State, action: Action): State {
       let n = state.tileTypes.length + 1;
       while (existingNames.has(`Tile ${n}`)) n++;
       const tile = makeBlankTile(`Tile ${n}`, bbox.width * bbox.height * 4);
-      const active = state.editor.activeTileId;
       return {
         ...state,
         tileTypes: [...state.tileTypes, tile],
-        editor: { ...state.editor, activeTileId: active ?? tile.id },
+        editor: { ...state.editor, activeTileId: tile.id },
       };
     }
 

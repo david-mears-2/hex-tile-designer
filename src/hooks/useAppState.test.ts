@@ -24,6 +24,13 @@ describe('useAppState', () => {
     expect(result.current.state.tileTypes).toHaveLength(4);
   });
 
+  it('addTile selects the newly added tile', () => {
+    const { result } = renderHook(() => useAppState());
+    act(() => result.current.addTile());
+    const tiles = result.current.state.tileTypes;
+    expect(result.current.state.editor.activeTileId).toBe(tiles[tiles.length - 1].id);
+  });
+
   it('addTile names the new tile "Tile N" where N = existing count + 1', () => {
     const { result } = renderHook(() => useAppState());
     act(() => result.current.addTile());
